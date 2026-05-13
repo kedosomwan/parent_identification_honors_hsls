@@ -1,0 +1,300 @@
+---
+title: "Prepare HSLS GCQ Data for Analysis"
+author: "Kristian Edosomwan"
+date: "2026-04-17"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Data Engineering
+## Load Libraries and Datasets
+
+```{r libraries}
+library(haven)
+library(dplyr)
+library(labelled)
+library(psych)
+library(broom)
+hsls_raw <- read_dta("hsls_17_student_pets_sr_v1_0.dta")
+names(hsls_raw) <- tolower(names(hsls_raw))
+```
+
+## Create Analytic Sample
+
+```{r subset-missing}
+hsls_na <- hsls_raw %>% filter(p1honors >= 0)
+
+# select relevant variables
+hsls_na <- hsls_na %>% select(stu_id, starts_with("x1"), starts_with("p1"), x3thimath9, starts_with("w1par"))
+
+# replace missing values
+hsls_na[hsls_na == -9] <- NA
+hsls_na[hsls_na == -8] <- NA
+hsls_na[hsls_na == -7] <- NA
+hsls_na[hsls_na == -6] <- NA
+hsls_na[hsls_na == -5] <- NA
+
+# filter out variables where more than 10% is missing
+hsls_na <- hsls_na %>% dplyr::select(where(~mean(is.na(.)) <= 0.10))
+```
+
+## Variable Manipulation
+```{r}
+# ---------------------------
+# Outcome variable
+# ---------------------------
+# par_says_honors: binary numeric (0/1)
+hsls <- hsls_na %>%
+  mutate(
+    par_says_honors = case_when(
+      p1honors == 1 ~ "1 yes",
+      p1honors == 0 ~ "0 no",
+      TRUE ~ NA
+    )
+  )
+
+# ---------------------------
+# Treatment variables
+# ---------------------------
+hsls <- hsls %>%
+  mutate(
+    # adv_math: binary numeric (0 = not advanced, 1 = advanced)
+    adv_math = case_when(
+      x3thimath9 <= 4 ~ "1 yes",
+      x3thimath9 >= 5 ~ "0 no"
+    ),
+
+    # math_3level: ordinal categorical (low → high)
+    math_3level = ordered(
+      case_when(
+        x3thimath9 <= 3 ~ "1 remedial",
+        x3thimath9 == 4 ~ "2 on-level",
+        x3thimath9 >= 5 ~ "3 advanced"
+      ),
+      levels = c("1 remedial", "2 on-level", "3 advanced")
+    ),
+
+    # math_4level: ordinal categorical (low → high)
+    math_4level = ordered(
+      case_when(
+        x3thimath9 <= 3 ~ "1 remedial",
+        x3thimath9 == 4 ~ "2 on-level",
+        x3thimath9 == 5 ~ "3 advanced",
+        x3thimath9 >= 6 ~ "4 double advanced"
+      ),
+      levels = c("1 remedial", "2 on-level", 
+                 "3 advanced", "4 double advanced")
+    )
+  )
+
+# ---------------------------
+# Controls
+# ---------------------------
+hsls <- hsls %>%
+  mutate(
+    # urban: binary numeric
+    urban = ifelse(x1locale == 1, "1 urban", "0 non-urban"),
+
+    # math_score: continuous numeric
+    math_score = ifelse(x1txmquint < 0, NA, x1txmtscor),
+
+    # public: binary numeric (1 = public, 0 = private)
+    public = case_when(
+      x1control == 1 ~ "1 public",
+      x1control == 2 ~ "0 private"
+    )
+  )
+
+# ---------------------------
+# Demographics
+# ---------------------------
+hsls <- hsls %>%
+  mutate(
+    # first_gen: binary numeric
+    first_gen = ifelse(x1paredu <= 3, 1,0),
+    par_ba = ifelse(x1paredu >= 4, 1, 0),
+
+    # female: binary numeric (1 = female)
+    female = ifelse(x1sex == 2, 1, 0),
+
+    # frpl: binary numeric
+    frpl = ifelse(x1poverty185 == 0, "0 no", "1 yes"),
+
+    # pov_level: ordinal numeric (1 = deepest poverty → 4 = no poverty)
+    pov_level = ordered(
+      case_when(
+        x1poverty185 == 0  ~ 4,
+        x1poverty185 == 1 & x1poverty130 == 0 ~ 3,
+        x1poverty130 == 1 & x1poverty == 0 ~ 2,
+        x1poverty == 1 ~ 1
+      ),
+      levels = c(1, 2, 3, 4)
+    ),
+
+    # first_lang: nominal categorical
+    first_lang = factor(
+      case_when(
+        x1duallang == 1 ~ "English only",
+        x1duallang == 2 ~ "Non-English only",
+        x1duallang == 3 ~ "English and another equally"
+      )
+    ),
+
+    # esl_program: binary numeric
+    esl_program = case_when(
+      p1ellever == 1 ~ "1 yes",
+      p1ellever == 2 ~ "0 no"
+    ),
+
+    # stud_race: nominal categorical
+    stud_race = factor(
+      case_when(
+        x1race %in% c(1, 7) ~ "Indigenous",
+        x1race == 2        ~ "Asian",
+        x1race == 3        ~ "Black",
+        x1race %in% c(4,5) ~ "Latinx",
+        x1race == 6        ~ "Multiple",
+        x1race == 8        ~ "White"
+      )
+    ),
+
+    # par_race: nominal categorical
+    par_race = factor(
+      case_when(
+        x1par1race == 2        ~ "Asian",
+        x1par1race == 3        ~ "Black",
+        x1par1race %in% c(4,5) ~ "Latinx",
+        x1par1race == 6        ~ "Multiple",
+        x1par1race == 8        ~ "White",
+        x1par1race == 9        ~ "Indigenous"
+      )
+    )
+  )
+
+# ---------------------------
+# Parent involvement
+# ---------------------------
+hsls <- hsls %>%
+  mutate(
+    # par_mtg: binary numeric
+    par_mtg = ifelse((p1ptomtg == 1 | p1schmtg == 1), 1, 0),
+
+    # par_sch_inv: count variable (numeric, Poisson-type)
+    par_sch_inv = par_mtg +
+                  p1counselor +
+                  p1schevent +
+                  p1volunteer +
+                  p1fundraise +
+                  p1ptconfer
+  )
+
+# ---------------------------
+# Parent expectations
+# ---------------------------
+hsls <- hsls %>%
+  mutate(
+    exp_ba = ifelse(p1eduexpect >= 6, 1, 0),
+    # par_exp: ordinal numeric (low → high expectations)
+    par_exp = ordered(
+      case_when(
+        p1eduexpect == 11            ~ 1,
+        p1eduexpect %in% c(1,2,3,4)  ~ 2,
+        p1eduexpect %in% c(5,6)      ~ 3,
+        p1eduexpect %in% c(7,8)      ~ 4,
+        p1eduexpect %in% c(9,10)     ~ 5
+      ),
+      levels = c(1, 2, 3, 4, 5)
+    )
+  )
+
+# check poverty groups
+##hsls %>% dplyr::select(pov_level, starts_with("x1pov")) %>% tbl_summary(by = pov_level)
+```
+# Save Clean Dataset
+
+```{r save}
+write_dta(hsls, "gcq_hsls_subset.dta")
+```
+
+
+# Analysis & Model Building on Unimputed Data
+
+## Descriptive Statistics
+
+```{r}
+df_summ <- hsls %>% dplyr::select(par_says_honors, math_3level, 
+                        exp_ba, par_ba, par_race, par_sch_inv,
+                        first_lang, frpl, pov_level, stud_race,
+                        math_score, public, urban)
+colSums(is.na(df_summ))
+df_summ %>% gtsummary::tbl_summary(by = par_race)
+```
+
+## Weight Data
+```{r}
+library(survey)
+
+df_svy <- svydesign(
+  data = hsls,
+  ids = ~stu_id,      # Use the tilde (~) for formulas
+  weights = ~w1parent # Use 'weights' instead of 'pweights'
+)
+df_brr <- svrepdesign(
+  weights = ~w1parent, 
+  repweights = "w1parent[0-9]+",
+  type = "BRR", 
+  data = hsls,
+  combined.weights = TRUE
+)
+```
+
+## Run Data for All
+```{r}
+library(jtools)
+library(dominanceanalysis)
+
+glm_all <-glm(data = hsls,
+           par_says_honors ~ math_3level + 
+           par_exp + par_race + par_sch_inv +
+           first_gen + first_lang + frpl +
+           math_score + public + urban,
+           family = "binomial")
+
+# Dominance Analysis
+dominanceAnalysis(glm_all)
+```
+
+## Weighted Analysis for All
+```{r}
+glm_all_panel <-       svyglm(design = df_svy,
+                        par_says_honors ~ math_3level + 
+                        par_exp + par_race + par_sch_inv +
+                        first_gen + first_lang + frpl +
+                        math_score + public + urban,
+                        family = "binomial")
+
+glm_all_brr <-       svyglm(design = df_brr,
+                        par_says_honors ~ math_3level + 
+                        par_exp + par_race + par_sch_inv +
+                        first_gen + first_lang + frpl +
+                        math_score + public + urban,
+                        family = "binomial")
+
+```
+
+```{r}
+library(gtsummary)
+tbl_regression(glm_all, exp = TRUE) %>% add_glance_source_note() %>% add_significance_stars()
+tbl_regression(glm_all_brr, exp = TRUE) %>% add_glance_source_note() %>% add_significance_stars()
+tbl_regression(glm_all_panel, exp = TRUE) %>% add_glance_source_note() %>% add_significance_stars()
+```
+
+
+
+
