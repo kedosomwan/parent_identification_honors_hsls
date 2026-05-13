@@ -53,17 +53,18 @@ meth
 df <- df %>% mutate(
   first_gen = factor(first_gen, levels = c(0,1)),
   exp_ba = factor(exp_ba, levels = c(0,1))
-)
+) 
 
 # Ordinal must be ordered factors
 df$math_3level <- ordered(df$math_3level)
 df$par_exp     <- ordered(df$par_exp)
 df$pov_level <- ordered(df$pov_level)
 
+df_subset <- df %>% dplyr::select(x1race, par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, x1race, starts_with("w1"), pov_level, p1eduaspire, x3thimath9, x1sex, x1ses, x1sesq5, x1txmtscor, x1duallang, x1par1race)
 
 # Run chained equations imputation
 df_imp <- mice(
-  df,
+  df_subset,
   m        = 40,     
   seed     = 123456
 )
