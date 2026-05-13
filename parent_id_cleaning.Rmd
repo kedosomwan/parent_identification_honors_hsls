@@ -22,6 +22,7 @@ library(labelled)
 library(psych)
 library(broom)
 library(gtsummary)
+library(jtools)
 hsls_raw <- read_dta("hsls_17_student_pets_sr_v1_0.dta")
 names(hsls_raw) <- tolower(names(hsls_raw))
 ```
@@ -204,11 +205,11 @@ hsls <- hsls %>%
     # par_exp: ordinal numeric (low → high expectations)
     par_exp = ordered(
       case_when(
-        p1eduexpect == 11            ~ 1,
-        p1eduexpect %in% c(1,2,3,4)  ~ 2,
-        p1eduexpect %in% c(5,6)      ~ 3,
-        p1eduexpect %in% c(7,8)      ~ 4,
-        p1eduexpect %in% c(9,10)     ~ 5
+        p1eduexpect == 11            ~ 1, # IDK
+        p1eduexpect %in% c(1,2,3,4)  ~ 2, # high school to Associate
+        p1eduexpect %in% c(5,6)      ~ 3, # start/complete BA
+        p1eduexpect %in% c(7,8)      ~ 4, #start/complete MA
+        p1eduexpect %in% c(9,10)     ~ 5 # sart/complete phd/professional
       ),
       levels = c(1, 2, 3, 4, 5)
     )
@@ -257,8 +258,6 @@ df_brr <- svrepdesign(
 
 ## Run Data for All
 ```{r}
-library(jtools)
-library(dominanceanalysis)
 
 glm_all <-glm(data = hsls,
            p1honors ~ math_3level + 
@@ -269,7 +268,7 @@ glm_all <-glm(data = hsls,
 glm_all %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
 ```
 
-## Weighted Analysis for All
+## Weighted Analysis for All: Panel Weights
 ```{r}
 glm_all_panel <-       svyglm(design = df_svy,
                         p1honors ~ math_3level + 
@@ -277,6 +276,11 @@ glm_all_panel <-       svyglm(design = df_svy,
                         first_gen + first_lang + frpl +
                         math_score + public + urban,
                         family = "binomial")
+glm_all_panel %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
+```
+
+## Weighted Analysis for All: BRR weights
+```{r}
 
 glm_all_brr <-       svyglm(design = df_brr,
                         p1honors ~ math_3level + 
@@ -284,15 +288,9 @@ glm_all_brr <-       svyglm(design = df_brr,
                         first_gen + first_lang + frpl +
                         math_score + public + urban,
                         family = "binomial")
-
+glm_all_brr %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
 ```
 
-```{r}
-library(gtsummary)
-tbl_regression(glm_all, exp = TRUE) %>% add_glance_source_note() %>% add_significance_stars()
-tbl_regression(glm_all_brr, exp = TRUE) %>% add_glance_source_note() %>% add_significance_stars()
-tbl_regression(glm_all_panel, exp = TRUE) %>% add_glance_source_note() %>% add_significance_stars()
-```
 
 
 
