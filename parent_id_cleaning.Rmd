@@ -232,10 +232,10 @@ write_dta(hsls, "gcq_hsls_subset.dta")
 ```{r}
 df_summ <- hsls %>% dplyr::select(par_says_honors, math_3level, 
                         exp_ba, par_ba, par_race, par_sch_inv,
-                        first_lang, frpl, pov_level, stud_race,
+                        first_lang, frpl, stud_race,
                         math_score, public, urban)
-colSums(is.na(df_summ))
-df_summ %>% gtsummary::tbl_summary(by = par_race)
+
+df_summ %>% gtsummary::tbl_summary(by = stud_race) %>% as_flex_table()
 ```
 
 ## Weight Data
