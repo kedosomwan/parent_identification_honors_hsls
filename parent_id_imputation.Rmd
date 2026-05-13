@@ -1,0 +1,102 @@
+---
+title: "imputation"
+output: html_document
+date: "2026-04-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Libraries and Data
+
+```{r}
+library(tidyverse)
+library(mice)
+library(howManyImputations)
+library(gtsummary)
+library(survey)
+library(mitools)
+df <- haven::read_dta("gcq_hsls_subset.dta")
+```
+
+# Imputations
+```{r}
+library(mice)
+# get rid of haven labelled for imputation
+df <- df %>% as_factor()
+# check missing data
+df_nw <- df %>% dplyr::select(-starts_with("w1"))
+colSums(is.na(df_nw))
+
+# 1. Dry run: iterations = 0
+init <- mice(df, maxit = 0)
+meth <- init$method
+meth
+```
+
+
+```{r}
+# Binary should be be 0/1 factor for logreg
+df <- df %>% mutate(
+  first_gen = factor(first_gen, levels = c(0,1)),
+  exp_ba = factor(exp_ba, levels = c(0,1))
+)
+
+# Ordinal must be ordered factors
+df$math_3level <- ordered(df$math_3level)
+df$par_exp     <- ordered(df$par_exp)
+df$pov_level <- ordered(df$pov_level)
+
+
+
+# Run chained equations imputation
+df_imp <- mice(
+  df,
+  #method   = meth,
+  m        = 20,     # add(20)
+  #maxit    = 10,     # burnin(10)
+  seed     = 123456,
+  printFlag = TRUE  # noisily
+)
+
+# Save the imputed data
+save(df_imp, "df_imputed.rdata")
+```
+
+## Racial/Ethnic Subgroups
+
+### Write function
+```{r}
+
+```
+
+## Asian American
+```{r}
+
+```
+
+## Black
+```{r}
+
+```
+
+## Indigenous
+```{r}
+
+```
+
+## Latinx
+```{r}
+
+```
+
+## Two or More Races
+```{r}
+
+```
+
+## White
+```{r}
+
+```
