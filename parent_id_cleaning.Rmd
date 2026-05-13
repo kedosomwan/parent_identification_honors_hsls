@@ -21,6 +21,7 @@ library(dplyr)
 library(labelled)
 library(psych)
 library(broom)
+library(gtsummary)
 hsls_raw <- read_dta("hsls_17_student_pets_sr_v1_0.dta")
 names(hsls_raw) <- tolower(names(hsls_raw))
 ```
@@ -260,27 +261,25 @@ library(jtools)
 library(dominanceanalysis)
 
 glm_all <-glm(data = hsls,
-           par_says_honors ~ math_3level + 
+           p1honors ~ math_3level + 
            par_exp + par_race + par_sch_inv +
            first_gen + first_lang + frpl +
            math_score + public + urban,
            family = "binomial")
-
-# Dominance Analysis
-dominanceAnalysis(glm_all)
+glm_all %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
 ```
 
 ## Weighted Analysis for All
 ```{r}
 glm_all_panel <-       svyglm(design = df_svy,
-                        par_says_honors ~ math_3level + 
+                        p1honors ~ math_3level + 
                         par_exp + par_race + par_sch_inv +
                         first_gen + first_lang + frpl +
                         math_score + public + urban,
                         family = "binomial")
 
 glm_all_brr <-       svyglm(design = df_brr,
-                        par_says_honors ~ math_3level + 
+                        p1honors ~ math_3level + 
                         par_exp + par_race + par_sch_inv +
                         first_gen + first_lang + frpl +
                         math_score + public + urban,
