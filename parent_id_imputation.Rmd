@@ -8,7 +8,7 @@ date: "2026-04-17"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Load Libraries and Data
+# Load Libraries
 
 ```{r}
 library(tidyverse)
@@ -17,39 +17,16 @@ library(howManyImputations)
 library(gtsummary)
 library(survey)
 library(mitools)
+```
+
+# Load Dataset
+```{r}
 df <- haven::read_dta("gcq_hsls_subset.dta")
 ```
 
-# Imputations
+# Modify Dataset
 ```{r}
-library(mice)
-# get rid of haven labelled for imputation
-df <- df %>% as_factor()
-# check missing data
-df_nw <- df %>% dplyr::select(-starts_with("w1"))
-colSums(is.na(df_nw))
-
-# Binary should be be 0/1 factor for logreg
-df_nw <- df_nw %>% mutate(
-  first_gen = factor(first_gen, levels = c(0,1)),
-  exp_ba = factor(exp_ba, levels = c(0,1))
-)
-
-# Ordinal must be ordered factors
-df$math_3level <- ordered(df$math_3level)
-df$par_exp     <- ordered(df$par_exp)
-df$pov_level <- ordered(df$pov_level)
-
-# 1. Dry run: iterations = 0
-init <- mice(df_nw, maxit = 0)
-meth <- init$method
-meth
-```
-
-
-```{r}
-
-# Binary should be be 0/1 factor for logreg
+## Binary should be be 0/1 factor for logreg
 df <- df %>% mutate(
   first_gen = factor(first_gen, levels = c(0,1)),
   exp_ba = factor(exp_ba, levels = c(0,1))
@@ -60,8 +37,25 @@ df$math_3level <- ordered(df$math_3level)
 df$par_exp     <- ordered(df$par_exp)
 df$pov_level <- ordered(df$pov_level)
 
-df_subset <- df %>% dplyr::select(x1race, par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, x1race, starts_with("w1"), pov_level, p1eduaspire, x1par1race)
+# nominal must be factors
+df$stud_race <- factor(df$stud_race)
+df$par_race <- factor(df$par_race)
+df$first_lang <- factor(df$first_lang)
 
+df_subset <- df %>% dplyr::select(par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"), pov_level)
+```
+
+# Initial Run and Methods
+
+```{r}
+#Dry run: iterations = 0
+init <- mice(df_subset, maxit = 0)
+meth <- init$method
+meth
+```
+
+
+```{r}
 # Run chained equations imputation
 df_imp <- mice(
   df_subset,
