@@ -29,7 +29,8 @@ df_stata <- haven::read_dta("gcq_hsls_subset.dta")
 ## Binary should be be 0/1 factor for logreg
 df <- df_stata %>% mutate(
   first_gen = factor(first_gen, levels = c(0,1)),
-  exp_ba = factor(exp_ba, levels = c(0,1))
+  exp_ba = factor(exp_ba, levels = c(0,1),
+  frpl = factor(frpl, levels = c(0,1)))
 ) 
 
 # Ordinal must be ordered factors
@@ -42,7 +43,7 @@ df$stud_race <- factor(df$stud_race)
 df$par_race <- factor(df$par_race)
 df$first_lang <- factor(df$first_lang)
 
-df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"), pov_level)
+df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, pov_level, w1parent)
 ```
 
 # Initial Run and Methods
@@ -52,6 +53,10 @@ df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_race, par_
 init <- mice(df_subset, maxit = 0)
 meth <- init$method
 meth
+
+init_nw <- mice(df_nw, maxit = 0)
+meth_nw <- init_nw$method
+meth_nw
 ```
 
 
