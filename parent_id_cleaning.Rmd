@@ -126,7 +126,7 @@ hsls <- hsls %>%
     female = ifelse(x1sex == 2, 1, 0),
 
     # frpl: binary numeric
-    frpl = ifelse(x1poverty185 == 0, "0 no", "1 yes"),
+    frpl = ifelse(x1poverty185 == 0, 0, 1),
 
     # pov_level: ordinal numeric (1 = deepest poverty → 4 = no poverty)
     pov_level = ordered(
