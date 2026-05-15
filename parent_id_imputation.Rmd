@@ -21,13 +21,13 @@ library(mitools)
 
 # Load Dataset
 ```{r}
-df <- haven::read_dta("gcq_hsls_subset.dta")
+df_stata <- haven::read_dta("gcq_hsls_subset.dta")
 ```
 
 # Modify Dataset
 ```{r}
 ## Binary should be be 0/1 factor for logreg
-df <- df %>% mutate(
+df <- df_stata %>% mutate(
   first_gen = factor(first_gen, levels = c(0,1)),
   exp_ba = factor(exp_ba, levels = c(0,1))
 ) 
@@ -42,7 +42,7 @@ df$stud_race <- factor(df$stud_race)
 df$par_race <- factor(df$par_race)
 df$first_lang <- factor(df$first_lang)
 
-df_subset <- df %>% dplyr::select(par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"), pov_level)
+df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"), pov_level)
 ```
 
 # Initial Run and Methods
@@ -59,58 +59,67 @@ meth
 # Run chained equations imputation
 df_imp <- mice(
   df_subset,
-  m        = 40,     
-  seed     = 123456
+  m        = 5,     
+  seed     = 123
 )
 
 # Save the imputed data
-save(df_imp, file = "df_imputed.rdata")
+#save(df_imp, file = "df_imputed.rdata")
+
+# Load imputed data
+load("df_imputed.rdata")
 ```
 
 ## Racial/Ethnic Subgroups
 
 ### Write function
 ```{r}
-load("df_imputed.rdata")
+
 run_hsls_glm <- function(data) {
-  glm(
+  with(data, glm(
     p1honors ~ math_3level + 
       par_exp + par_race + par_sch_inv +
       first_gen + first_lang + frpl +
       math_score + public + urban,
-    data = data,
-    family = "binomial"
-  )
+    family = "binomial"))
 }
 
 ```
 
 ## Asian American
 ```{r}
-
+asian_imp <- filter(df_imp, stud_race == 1)
+asian_glm <- with(asian_imp,   glm(
+    p1honors ~ math_3level + 
+      par_exp + par_sch_inv +
+      first_gen + first_lang + frpl +
+      math_score + public + urban,
+    family = "binomial"
+  ))
+asian_glm %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_se = FALSE, hide_p = TRUE) %>% add_glance_source_note() %>% as_flex_table()
 ```
 
 ## Black
 ```{r}
-
+black_imp <- filter(df_imp, stud_race == 2)
 ```
 
 ## Indigenous
 ```{r}
-
+indigenous_imp <- filter(df_imp, stud_race == 3)
 ```
 
 ## Latinx
 ```{r}
-
+latinx_imp <- filter(df_imp, stud_race == 4)
 ```
 
 ## Two or More Races
 ```{r}
-
+multi_imp <- filter(df_imp, stud_race == 5)
 ```
 
 ## White
 ```{r}
-
+white_imp <- filter(df_imp, stud_race == 6)
 ```
