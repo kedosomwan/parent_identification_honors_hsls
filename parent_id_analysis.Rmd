@@ -440,7 +440,7 @@ df_brr_imp <- svrepdesign(
 
 ## Write function
 ```{r}
-hsls_svy_glm_imp <- function(data) {
+hsls_glm_svy_imp <- function(data) {
   with(data,   svyglm(
     p1honors ~ as.numeric(math_4level) + 
       as.numeric(par_exp) + as.numeric(par_sch_inv) +
@@ -467,22 +467,29 @@ make_mi_table <- function(pooled_model) {
 ## Asian American
 ```{r}
 asian_brr_imp <- subset(df_brr_imp, stud_race == 1)
-asian_svyglm_imp <- hsls_svy_glm_imp(asian_brr_imp)
+
+asian_svyglm_imp <- hsls_glm_svy_imp(asian_brr_imp)
+
 asian_svyglm_pooled <- MIcombine(asian_svyglm_imp)
+
 summary(asian_svyglm_pooled)
+
+asian_brr_imp_df <- as.data.frame(summary(asian_svyglm_pooled)) %>% 
+  mutate(or = exp(results), ll = exp(`(lower`), ul = exp(`upper)`))
+
 ```
 
 ## Black
 ```{r}
 # Create Black subset
-black_svy <- subset(df_brr, stud_race == 2)
+black_brr_imp <- subset(df_brr_imp, stud_race == 2)
 
 # Run Imputation & check how many needed
-black_svyglm <- black_svy %>% hsls_glm_svy()
+black_svyglm_imp <- black_brr_imp %>% hsls_glm_svy_imp()
 
 # Create Tables
-black_svytbl <- black_svyglm %>% hsls_tbl_merge
-black_svyglm %>% hsls_tbl_view()
+black_svyglm_pooled <- pool(black_svyglm_imp)
+summary(black_svyglm_pooled, exp = TRUE)
 ```
 
 ## Indigenous
