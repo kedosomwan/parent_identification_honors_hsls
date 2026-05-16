@@ -30,7 +30,11 @@ names(hsls_raw) <- tolower(names(hsls_raw))
 ## Create Analytic Sample
 
 ```{r subset-missing}
-hsls_na <- hsls_raw %>% filter(p1honors >= 0)
+
+hsls_na <- hsls_raw %>% filter(
+  p1honors >= 0, # take out observations where not response to outcome
+  x3thimath9!=0) # take out obserfvations where student is not in a mathematics class
+
 
 # select relevant variables
 hsls_na <- hsls_na %>% select(stu_id, starts_with("x1"), starts_with("p1"), x3thimath9, starts_with("w1par"))
@@ -68,8 +72,8 @@ hsls <- hsls %>%
   mutate(
     # adv_math: binary numeric (0 = not advanced, 1 = advanced)
     adv_math = case_when(
-      x3thimath9 <= 4 ~ "1 yes",
-      x3thimath9 >= 5 ~ "0 no"
+      x3thimath9 <= 4 ~ 1,
+      x3thimath9 >= 5 ~ 0
     ),
 
     # math_3level: ordinal categorical (low → high)
@@ -101,15 +105,15 @@ hsls <- hsls %>%
 hsls <- hsls %>%
   mutate(
     # urban: binary numeric
-    urban = ifelse(x1locale == 1, "1 urban", "0 non-urban"),
+    urban = ifelse(x1locale == 1, 1, 0),
 
     # math_score: continuous numeric
     math_score = ifelse(x1txmquint < 0, NA, x1txmtscor),
 
     # public: binary numeric (1 = public, 0 = private)
     public = case_when(
-      x1control == 1 ~ "1 public",
-      x1control == 2 ~ "0 private"
+      x1control == 1 ~ 1,
+      x1control == 2 ~ 0
     )
   )
 
