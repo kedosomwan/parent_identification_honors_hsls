@@ -287,6 +287,20 @@ jtools::summ(glm_all4, exp = TRUE)
 glm_all4 %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
 ```
 
+## Run Data for All 4 Math Levels with quintile instead of score
+```{r}
+glm_all4_quint <-glm(data = hsls,
+           p1honors ~ math_4level + 
+           par_exp + par_race + par_sch_inv +
+           first_gen + first_lang + frpl +
+           ordered(math_quintile) + public + urban,
+           family = "binomial")
+jtools::summ(glm_all4_quint, exp = TRUE)
+
+
+glm_all4_quint %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
+```
+
 ## Weighted Analysis for All: Panel Weights
 ```{r}
 glm_all_panel <-       svyglm(design = df_svy,
