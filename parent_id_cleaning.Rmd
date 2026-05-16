@@ -50,7 +50,7 @@ hsls_model %>% drop_unused_value_labels() %>% haven::as_factor() %>%  tbl_summar
 
 ```{r subset replace missing values with NA}
 # select relevant variables
-hsls_na <- hsls_na %>% select(stu_id, starts_with("x1"), starts_with("p1"), x3thimath9, starts_with("w1par"))
+hsls_na <- hsls_na %>% select(stu_id, starts_with("x1"), starts_with("p1"), x3thimath9, ends_with("m09"), starts_with("w1par"))
 
 # replace missing values
 hsls_na[hsls_na == -9] <- NA
@@ -64,51 +64,52 @@ hsls_na <- hsls_na %>% dplyr::select(where(~mean(is.na(.)) <= 0.10))
 ```
 
 ## Variable Manipulation
-```{r}
-# ---------------------------
-# Outcome variable
-# ---------------------------
-# par_says_honors: binary numeric (0/1)
-hsls <- hsls_na %>%
-  mutate(
-    par_says_honors = case_when(
-      p1honors == 1 ~ "1 yes",
-      p1honors == 0 ~ "0 no",
-      TRUE ~ NA
-    )
-  )
 
+Decided to use student survey to determine math level because it has less missing data than the transcript data for 9th grade math class. Using Math course indicators based on Riegle-Crumb et al. (2005, p. 14)
+```{r}
 # ---------------------------
 # Treatment variables
 # ---------------------------
-hsls <- hsls %>%
+hsls <- hsls_na %>%
   mutate(
-    # adv_math: binary numeric (0 = not advanced, 1 = advanced)
-    adv_math = case_when(
-      x3thimath9 <= 4 ~ 1,
-      x3thimath9 >= 5 ~ 0
+      math9 = ordered(
+        case_when(
+      s1alg1m09  == 1 ~ "Algebra I",
+      s1geom09   == 1 ~ "Geometry",
+      s1alg2m09  == 1 ~ "Algebra II",
+      s1trigm09  == 1 ~ "Trigonometry",
+      s1revm09   == 1 ~ "Remedial Math",
+      s1statsm09 == 1 ~ "Statistics/Probability",
+      s1prealgm09== 1 ~ "Pre-Algebra",
+      s1angeom09 == 1 ~ "Analytic Geometry",
+      s1advm09   == 1 ~ "Advanced Math",
+      s1othm09   == 1 ~ "Other Math",
+      TRUE ~ NA_character_
     ),
+    levels = c("Other Math","Remedial Math", "Pre-Algebra", "Algebra I", "Geometry", "Analytic Geometry", "Algebra II", "Advanced Math","Statistics/Probability", "Trigonometry")),
 
+    # adv_math: binary numeric (0 = not advanced, 1 = advanced)
+    adv_math = ifelse(math9 >=5, 1, 0),
     # math_3level: ordinal categorical (low → high)
     math_3level = ordered(
       case_when(
-        x3thimath9 <= 3 ~ "1 remedial",
-        x3thimath9 == 4 ~ "2 on-level",
-        x3thimath9 >= 5 ~ "3 advanced"
+        math9 <= 3 ~ "remedial",
+        math9 == 4 ~ "on-level",
+        math9 >= 5 ~ "advanced"
       ),
-      levels = c("1 remedial", "2 on-level", "3 advanced")
+      levels = c("remedial", "on-level", "advanced")
     ),
 
     # math_4level: ordinal categorical (low → high)
     math_4level = ordered(
       case_when(
-        x3thimath9 <= 3 ~ "1 remedial",
-        x3thimath9 == 4 ~ "2 on-level",
-        x3thimath9 == 5 ~ "3 advanced",
-        x3thimath9 >= 6 ~ "4 double advanced"
+        as.numeric(math9) <= 3 ~ "remedial",
+        as.numeric(math9) == 4 ~ "on-level",
+        as.numeric(math9) == 5 | as.numeric(math9) == 6 ~ "advanced",
+        as.numeric(math9) >= 7 ~ "double advanced"
       ),
-      levels = c("1 remedial", "2 on-level", 
-                 "3 advanced", "4 double advanced")
+      levels = c("remedial", "on-level", 
+                 "advanced", "double advanced")
     )
   )
 
@@ -125,10 +126,7 @@ hsls <- hsls %>%
     math_quintile = x1txmquint,
 
     # public: binary numeric (1 = public, 0 = private)
-    public = case_when(
-      x1control == 1 ~ 1,
-      x1control == 2 ~ 0
-    )
+    public = ifelse(x1control == 1, 1, 0)
   )
 
 # ---------------------------
@@ -137,7 +135,7 @@ hsls <- hsls %>%
 hsls <- hsls %>%
   mutate(
     # first_gen: binary numeric
-    first_gen = ifelse(x1paredu <= 3, 1,0),
+    first_gen = ifelse(x1paredu <= 3,1,0),
     par_ba = ifelse(x1paredu >= 4, 1, 0),
 
     # female: binary numeric (1 = female)
@@ -204,12 +202,12 @@ hsls <- hsls %>%
   mutate(
 
     # par_sch_inv: count variable (numeric, Poisson-type)
-    par_sch_inv = p1ptomtg +
+    par_sch_inv = as.numeric(p1ptomtg +
                   p1schmtg +
                   p1schevent +
                   p1volunteer +
                   p1fundraise +
-                  p1ptconfer
+                  p1ptconfer)
   )
 
 # ---------------------------
@@ -234,25 +232,26 @@ hsls <- hsls %>%
 # check poverty groups
 ##hsls %>% dplyr::select(pov_level, starts_with("x1pov")) %>% tbl_summary(by = pov_level)
 ```
-# Save Clean Dataset
+
+## Descriptive Statistics
+
+```{r}
+df_summ <- hsls %>% dplyr::select(p1honors, math_4level,
+                        par_exp, par_ba, par_sch_inv,
+                        first_lang, frpl, stud_race,
+                        math_score, public, x1locale)
+
+df_summ %>% gtsummary::tbl_summary(by = stud_race, type = list(all_continuous() ~ "continuous2",
+                          c(par_sch_inv) ~ "continuous2"),
+    statistic = all_continuous() ~ "{mean} ({sd})") %>% as_flex_table()
+```
+## Save Clean Dataset
 
 ```{r save}
 write_dta(hsls, "gcq_hsls_subset.dta")
 ```
 
-
 # Analysis & Model Building on Unimputed Data
-
-## Descriptive Statistics
-
-```{r}
-df_summ <- hsls %>% dplyr::select(par_says_honors, math_3level, 
-                        exp_ba, par_ba, par_race, par_sch_inv,
-                        first_lang, frpl, stud_race,
-                        math_score, public, urban)
-
-df_summ %>% gtsummary::tbl_summary(by = stud_race) %>% as_flex_table()
-```
 
 ## Weight Data
 ```{r}
@@ -325,7 +324,6 @@ glm_all_panel %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci 
 
 ## Weighted Analysis for All: BRR weights
 ```{r}
-
 glm_all_brr <-       svyglm(design = df_brr,
                         p1honors ~ math_3level + 
                         par_exp + par_race + par_sch_inv +
