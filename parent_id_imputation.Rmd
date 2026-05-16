@@ -1,7 +1,11 @@
 ---
 title: "imputation"
-output: html_document
-date: "2026-04-17"
+author: "Kristian Edosomwan"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc: true
+    toc_depth: 3
 ---
 
 ```{r setup, include=FALSE}
