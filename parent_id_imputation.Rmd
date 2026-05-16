@@ -43,7 +43,7 @@ df$stud_race <- factor(df$stud_race)
 df$par_race <- factor(df$par_race)
 df$first_lang <- factor(df$first_lang)
 
-df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_race, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, pov_level, w1parent)
+df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, w1parent)
 ```
 
 # Initial Run and Methods
@@ -77,12 +77,26 @@ df_imp <- mice(
 ```{r}
 
 run_hsls_glm <- function(data) {
-  with(data, glm(
+  with(data,   glm(
     p1honors ~ math_3level + 
-      par_exp + par_race + par_sch_inv +
+      par_exp + par_sch_inv +
       first_gen + first_lang + frpl +
       math_score + public + urban,
-    family = "binomial"))
+    family = "binomial"
+  ))
+}
+hsls_tbl_merge <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
+    add_glance_source_note() 
+}
+hsls_tbl_view <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = FALSE, hide_ci = FALSE) %>% 
+    add_glance_source_note() %>% 
+    as_flex_table()
 }
 
 ```
@@ -90,37 +104,74 @@ run_hsls_glm <- function(data) {
 ## Asian American
 ```{r}
 asian_imp <- filter(df_imp, stud_race == 1)
-asian_glm <- with(asian_imp,   glm(
-    p1honors ~ math_3level + 
-      par_exp + par_sch_inv +
-      first_gen + first_lang + frpl +
-      math_score + public + urban,
-    family = "binomial"
-  ))
-asian_glm %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_se = FALSE, hide_p = TRUE) %>% add_glance_source_note() %>% as_flex_table()
+asian_glm <- run_hsls_glm(asian_imp)
+asian_glm %>% hsls_tbl_view()
+asian_tbl <- asian_glm %>% hsls_tbl_merge
+how_many_imputations(asian_glm)
 ```
 
 ## Black
 ```{r}
+# Create Black subset
 black_imp <- filter(df_imp, stud_race == 2)
+
+# Run Imputation & check how many needed
+black_glm <- black_imp %>% run_hsls_glm()
+black_glm %>% how_many_imputations()
+
+# Create Tables
+black_tbl <- black_glm %>% hsls_tbl_merge
+black_glm %>% hsls_tbl_view()
 ```
 
 ## Indigenous
 ```{r}
 indigenous_imp <- filter(df_imp, stud_race == 3)
+
+# Run Imputation & check how many needed
+indigenous_glm <- indigenous_imp %>% run_hsls_glm()
+indigenous_glm %>% how_many_imputations()
+
+# Create Tables
+indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
+indigenous_glm %>% hsls_tbl_view()
 ```
 
 ## Latinx
 ```{r}
 latinx_imp <- filter(df_imp, stud_race == 4)
+
+# Run Imputation & check how many needed
+latinx_glm <- latinx_imp %>% run_hsls_glm()
+latinx_glm %>% how_many_imputations()
+
+# Create Tables
+latinx_tbl <- latinx_glm %>% hsls_tbl_merge
+latinx_glm %>% hsls_tbl_view()
 ```
 
 ## Two or More Races
 ```{r}
 multi_imp <- filter(df_imp, stud_race == 5)
+
+# Run Imputation & check how many needed
+multi_glm <- multi_imp %>% run_hsls_glm()
+multi_glm %>% how_many_imputations()
+
+# Create Tables
+multi_tbl <- multi_glm %>% hsls_tbl_merge
+multi_glm %>% hsls_tbl_view()
 ```
 
 ## White
 ```{r}
 white_imp <- filter(df_imp, stud_race == 6)
+
+# Run Imputation & check how many needed
+white_glm <- white_imp %>% run_hsls_glm()
+white_glm %>% how_many_imputations()
+
+# Create Tables
+white_tbl <- white_glm %>% hsls_tbl_merge
+white_glm %>% hsls_tbl_view()
 ```
