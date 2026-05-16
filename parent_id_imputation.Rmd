@@ -41,13 +41,14 @@ df <- df_stata %>% mutate(
 df$math_3level <- ordered(df$math_3level)
 df$par_exp     <- ordered(df$par_exp)
 df$pov_level <- ordered(df$pov_level)
+df$math_quintile <- ordered(df$math_quintile)
 
 # nominal must be factors
 df$stud_race <- factor(df$stud_race)
 df$par_race <- factor(df$par_race)
 df$first_lang <- factor(df$first_lang)
 
-df_subset <- df %>% dplyr::select(stu_id, p1honors, par_exp, math_3level, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"))
+df_subset <- df %>% dplyr::select(stu_id, p1honors, par_exp, math_3level, math_quintile, math_4level, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"))
 ```
 
 # Initial Run and Methods
