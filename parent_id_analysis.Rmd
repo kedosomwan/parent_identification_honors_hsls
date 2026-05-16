@@ -452,13 +452,13 @@ hsls_glm_svy_imp <- function(data) {
   ))
 }
 
-# function to exponentiate results
+# function to exponentiate results into dataframe
 make_mi_table <- function(pooled_model) {
   as.data.frame(summary(pooled_model)) %>% 
+  tibble::rownames_to_column("variable") %>% # make variable column
   mutate(
-    or = exp(results), 
-    ll = exp(`(lower`), 
-    ul = exp(`upper)`))
+    or = exp(results), ll = exp(`(lower`), ul = exp(`upper)`), # exponentiate values
+    z = results / se, p_value = 2 * (1 - pnorm(abs(z)))) # calculate p-value with Wald Test
 }
 
 ```
@@ -474,9 +474,11 @@ asian_svyglm_pooled <- MIcombine(asian_svyglm_imp)
 
 summary(asian_svyglm_pooled)
 
-asian_brr_imp_df <- as.data.frame(summary(asian_svyglm_pooled)) %>% 
-  mutate(or = exp(results), ll = exp(`(lower`), ul = exp(`upper)`))
+# extract summary data into table
+asian_brr_imp_df <- make_mi_table(asian_svyglm_pooled)
 
+# add race and model
+asian_brr_imp_df <- asian_brr_imp_df %>% mutate(race = "Asian American", model = "weighted") # add race and weighted model
 ```
 
 ## Black
