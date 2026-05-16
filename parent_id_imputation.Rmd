@@ -39,6 +39,7 @@ df <- df_stata %>% mutate(
 
 # Ordinal must be ordered factors
 df$math_3level <- ordered(df$math_3level)
+df$math_4level <- ordred(df$math_3level)
 df$par_exp     <- ordered(df$par_exp)
 df$pov_level <- ordered(df$pov_level)
 df$math_quintile <- ordered(df$math_quintile)
