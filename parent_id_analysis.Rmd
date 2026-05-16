@@ -36,7 +36,7 @@ df <- haven::read_dta("gcq_hsls_subset.dta")
 ```{r}
 hsls_glm <- function(data) {
   glm(
-    p1honors ~ math4_level + 
+    p1honors ~ math_4level + 
       par_exp + par_sch_inv +
       first_gen + as.factor(first_lang) + frpl +
       math_score + public + as.factor(x1locale),
@@ -210,7 +210,7 @@ indigenous_svyglm <- indigenous_svy %>% hsls_glm_svy()
 
 
 # Create Tables
-indigenous_tbl <- indigenous_svyglm %>% hsls_tbl_merge
+indigenous_svytbl <- indigenous_svyglm %>% hsls_tbl_merge
 indigenous_svyglm %>% hsls_tbl_view()
 ```
 
