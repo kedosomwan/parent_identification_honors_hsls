@@ -20,6 +20,7 @@ library(mice)
 library(howManyImputations)
 library(gtsummary)
 library(survey)
+library(jtools)
 library(mitools)
 ```
 
@@ -35,10 +36,10 @@ df <- haven::read_dta("gcq_hsls_subset.dta")
 ```{r}
 hsls_glm <- function(data) {
   glm(
-    p1honors ~ as.numeric(math_3level) + 
-      as.numeric(par_exp) + par_sch_inv +
-      first_gen + first_lang + frpl +
-      math_score + public + x1locale,
+    p1honors ~ ordered(math_4level) + 
+      ordered(par_exp) + par_sch_inv +
+      first_gen + as.factor(first_lang) + frpl +
+      math_score + public + as.factor(x1locale),
     data = data,
     family = "binomial"
   )
@@ -65,10 +66,9 @@ hsls_tbl_view <- function(data){
 ## Asian American
 ```{r}
 asian <- filter(df, stud_race == 1)
-asian_glm <- hsls_glm_imp(asian)
+asian_glm <- hsls_glm(asian)
 asian_glm %>% hsls_tbl_view()
 asian_tbl <- asian_glm %>% hsls_tbl_merge
-how_manyutations(asian_glm)
 ```
 
 ## Black
@@ -77,7 +77,7 @@ how_manyutations(asian_glm)
 black <- filter(df, stud_race == 2)
 
 # Run Imputation & check how many needed
-black_glm <- black %>% hsls_glm_imp()
+black_glm <- black %>% hsls_glm()
 
 # Create Tables
 black_tbl <- black_glm %>% hsls_tbl_merge
@@ -89,7 +89,7 @@ black_glm %>% hsls_tbl_view()
 indigenous <- filter(df, stud_race == 3)
 
 # Run Imputation & check how many needed
-indigenous_glm <- indigenous %>% hsls_glm_imp()
+indigenous_glm <- indigenous %>% hsls_glm()
 
 
 # Create Tables
@@ -102,7 +102,7 @@ indigenous_glm %>% hsls_tbl_view()
 latinx <- filter(df, stud_race == 4)
 
 # Run Imputation & check how many needed
-latinx_glm <- latinx %>% hsls_glm_imp()
+latinx_glm <- latinx %>% hsls_glm()
 
 
 # Create Tables
@@ -115,7 +115,7 @@ latinx_glm %>% hsls_tbl_view()
 multi <- filter(df, stud_race == 5)
 
 # Run Imputation & check how many needed
-multi_glm <- multi %>% hsls_glm_imp()
+multi_glm <- multi %>% hsls_glm()
 
 
 # Create Tables
@@ -128,7 +128,7 @@ multi_glm %>% hsls_tbl_view()
 white <- filter(df, stud_race == 6)
 
 # Run Imputation & check how many needed
-white_glm <- white %>% hsls_glm_imp()
+white_glm <- white %>% hsls_glm()
 
 
 # Create Tables
