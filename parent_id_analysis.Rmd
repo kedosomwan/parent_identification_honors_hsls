@@ -152,7 +152,7 @@ tbl_merge(
 library(survey)
 
 df_svy <- svydesign(
-  data = hsls,
+  data = df,
   ids = ~stu_id,      # Use the tilde (~) for formulas
   weights = ~w1parent # Use 'weights' instead of 'pweights'
 )
@@ -160,7 +160,7 @@ df_brr <- svrepdesign(
   weights = ~w1parent, 
   repweights = "w1parent[0-9]+",
   type = "BRR", 
-  data = hsls,
+  data = df,
   combined.weights = TRUE
 )
 ```
@@ -171,10 +171,10 @@ df_brr <- svrepdesign(
 hsls_glm_panel <- function(data) {
   svyglm(
     p1honors ~ math_4level + 
-      as.numeric(par_exp) + par_sch_inv +
-      first_gen + first_lang + frpl +
-      math_score + public + x1locale,
-    design = df_svy,
+     par_exp + par_sch_inv +
+      first_gen + factor(first_lang) + frpl +
+      math_score + public + factor(x1locale),
+    design = data,
     family = "binomial"
   )
 }
@@ -185,15 +185,15 @@ hsls_glm_brr <- function(data) {
       as.numeric(par_exp) + par_sch_inv +
       first_gen + first_lang + frpl +
       math_score + public + x1locale,
-    design = df_brr,
+    design = data,
     family = "binomial"
   )
 }
 ```
 ## Asian American
 ```{r}
-asian <- filter(df, stud_race == 1)
-asian_svyglm <- hsls_glm_panel(asian)
+asian_svy <- subset(df_brr, stud_race == 1)
+asian_svyglm <- hsls_glm_brr(asian_svy)
 asian_svyglm %>% hsls_tbl_view()
 asian_svytbl <- asian_svyglm %>% hsls_tbl_merge
 
