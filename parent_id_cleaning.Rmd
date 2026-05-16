@@ -260,16 +260,30 @@ df_brr <- svrepdesign(
 )
 ```
 
-## Run Data for All
+## Run Data for All 3 Math Levels
 ```{r}
-
-glm_all <-glm(data = hsls,
+glm_all3 <-glm(data = hsls,
            p1honors ~ math_3level + 
            par_exp + par_race + par_sch_inv +
            first_gen + first_lang + frpl +
            math_score + public + urban,
            family = "binomial")
-glm_all %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
+jtools::summ(glm_all3, exp = TRUE)
+glm_all3 %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
+```
+
+## Run Data for All 4 Math Levels
+```{r}
+glm_all4 <-glm(data = hsls,
+           p1honors ~ math_4level + 
+           par_exp + par_race + par_sch_inv +
+           first_gen + first_lang + frpl +
+           math_score + public + urban,
+           family = "binomial")
+jtools::summ(glm_all4, exp = TRUE)
+
+
+glm_all4 %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
 ```
 
 ## Weighted Analysis for All: Panel Weights
