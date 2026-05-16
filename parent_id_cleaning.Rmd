@@ -1,9 +1,9 @@
 ---
 title: "Prepare HSLS GCQ Data for Analysis"
 author: "Kristian Edosomwan"
-date: "2026-04-17"
+date: "`r Sys.Date()`"
 output:
-  html_document:
+  word_document:
     toc: true
     toc_depth: 3
 ---
