@@ -1,7 +1,11 @@
 ---
-title: "imputation"
-output: html_document
-date: "2026-04-17"
+title: "analysis"
+author: "Kristian Edosomwan"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc: true
+    toc_depth: 3
 ---
 
 ```{r setup, include=FALSE}
@@ -42,13 +46,13 @@ hsls_tbl_merge <- function(data){
   data %>% 
     tbl_regression(exp = TRUE) %>% 
     add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
-    add_glance_source_note() 
+    add_glance_table() 
 }
 hsls_tbl_view <- function(data){
   data %>% 
     tbl_regression(exp = TRUE) %>% 
     add_significance_stars(hide_se = FALSE, hide_p = FALSE, hide_ci = FALSE) %>% 
-    add_glance_source_note() %>% 
+    add_glance_table() %>% 
     as_flex_table()
 }
 
@@ -127,6 +131,16 @@ white_glm %>% how_many_imputations()
 white_tbl <- white_glm %>% hsls_tbl_merge
 white_glm %>% hsls_tbl_view()
 ```
+
+## Combined Table
+```{r}
+tbl_merge(
+  tbls = list(asian_tbl, black_tbl, indigenous_tbl, latinx_tbl, multi_tbl, white_tbl),
+  tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
+  ) %>% 
+  as_flex_table()
+```
+
 # WEIGHTED Racial/Ethnic Subgroups
 
 ## Weight Data
