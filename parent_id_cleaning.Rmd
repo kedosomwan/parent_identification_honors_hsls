@@ -9,12 +9,13 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 # Data Engineering
 ## Load Libraries and Datasets
 
+The full raw dataset (n = 23,503)
 ```{r libraries}
 library(haven)
 library(dplyr)
@@ -28,14 +29,23 @@ names(hsls_raw) <- tolower(names(hsls_raw))
 ```
 
 ## Create Analytic Sample
+after removing parent non-responders (n = 16788)
+after removing no math students (n = 14805)
+```{r remove non-response}
+hsls_raw %>% count(p1honors)
+hsls_raw %>% count(x3thimath9)
 
-```{r subset-missing}
+# take out observations with outcome non-response
+hsls_na <- hsls_raw %>% filter(p1honors !=-8)
+# take out observations where student is not in a mathematics class
+hsls_na <- hsls_na %>% filter(s1mfall09 == 1) 
+```
 
-hsls_na <- hsls_raw %>% filter(
-  p1honors >= 0, # take out observations where not response to outcome
-  x3thimath9!=0) # take out obserfvations where student is not in a mathematics class
+```{r}
 
+```
 
+```{r subset replace missing values with NA}
 # select relevant variables
 hsls_na <- hsls_na %>% select(stu_id, starts_with("x1"), starts_with("p1"), x3thimath9, starts_with("w1par"))
 
