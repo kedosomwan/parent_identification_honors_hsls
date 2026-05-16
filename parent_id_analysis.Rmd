@@ -35,8 +35,8 @@ load("df_imputed.rdata")
 ```{r}
 run_hsls_glm <- function(data) {
   with(data,   glm(
-    p1honors ~ math_3level + 
-      par_exp + par_sch_inv +
+    p1honors ~ as.numeric(math_3level) + 
+      as.numeric(par_exp) + par_sch_inv +
       first_gen + first_lang + frpl +
       math_score + public + urban,
     family = "binomial"
