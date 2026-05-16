@@ -35,8 +35,8 @@ df <- df_stata %>% mutate(
   first_gen = factor(first_gen, levels = c(0,1)),
   exp_ba = factor(exp_ba, levels = c(0,1)),
   frpl = factor(frpl, levels = c(0,1)),
-  p1honors = factor(p1honors, levels = c(0,1))
-) 
+  p1honors = factor(p1honors, levels = c(0,1)),
+  female = factor(female, levels = c(0,1)))
 
 # Ordinal must be ordered factors
 df$math_4level <- ordered(df$math_4level)
@@ -64,13 +64,15 @@ meth
 
 
 ```{r}
+start_time <- Sys.time()
 # Run chained equations imputation
 df_imp <- mice(
   df_subset,
   m        = 20,     
   seed     = 123
 )
-
+end_time <- Sys.time()
+end_time - start_time
 # Save the imputed data
 save(df_imp, file = "df_imputed.rdata")
 
