@@ -26,23 +26,127 @@ library(mitools)
 ## Load dataset
 ```{r}
 load("df_imputed.rdata")
+hsls <- haven::read_dta("gcq_hsls_subset.dta")
 ```
 
-# UNIMPUTED
+# UNIMPUTED - NO WEIGHTS
 
-## Run Data for All, Unweighted
+### Write function
 ```{r}
-glm_all <-glm(data = hsls,
-           p1honors ~ math_4level + 
-           par_exp + par_race + par_sch_inv +
-           first_gen + first_lang + frpl +
-           math_score + public + urban,
-           family = "binomial")
-jtools::summ(glm_all, exp = TRUE)
+hsls_glm <- function(data) {
+  glm(
+    p1honors ~ as.numeric(math_3level) + 
+      as.numeric(par_exp) + par_sch_inv +
+      first_gen + first_lang + frpl +
+      math_score + public + x1locale,
+    data = data,
+    family = "binomial"
+  )
+}
 
 
-glm_all %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
+hsls_tbl_merge <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
+    add_glance_table() 
+}
+
+
+hsls_tbl_view <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = FALSE, hide_ci = FALSE) %>% 
+    add_glance_table() %>% 
+    as_flex_table()
+}
+
 ```
+## Asian American
+```{r}
+asian <- filter(df, stud_race == 1)
+asian_glm <- run_hsls_glm(asian)
+asian_glm %>% hsls_tbl_view()
+asian_tbl <- asian_glm %>% hsls_tbl_merge
+how_manyutations(asian_glm)
+```
+
+## Black
+```{r}
+# Create Black subset
+black <- filter(df, stud_race == 2)
+
+# Run Imputation & check how many needed
+black_glm <- black %>% run_hsls_glm()
+
+# Create Tables
+black_tbl <- black_glm %>% hsls_tbl_merge
+black_glm %>% hsls_tbl_view()
+```
+
+## Indigenous
+```{r}
+indigenous <- filter(df, stud_race == 3)
+
+# Run Imputation & check how many needed
+indigenous_glm <- indigenous %>% run_hsls_glm()
+
+
+# Create Tables
+indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
+indigenous_glm %>% hsls_tbl_view()
+```
+
+## Latinx
+```{r}
+latinx <- filter(df, stud_race == 4)
+
+# Run Imputation & check how many needed
+latinx_glm <- latinx %>% run_hsls_glm()
+
+
+# Create Tables
+latinx_tbl <- latinx_glm %>% hsls_tbl_merge
+latinx_glm %>% hsls_tbl_view()
+```
+
+## Two or More Races
+```{r}
+multi <- filter(df, stud_race == 5)
+
+# Run Imputation & check how many needed
+multi_glm <- multi %>% run_hsls_glm()
+
+
+# Create Tables
+multi_tbl <- multi_glm %>% hsls_tbl_merge
+multi_glm %>% hsls_tbl_view()
+```
+
+## White
+```{r}
+white <- filter(df, stud_race == 6)
+
+# Run Imputation & check how many needed
+white_glm <- white %>% run_hsls_glm()
+
+
+# Create Tables
+white_tbl <- white_glm %>% hsls_tbl_merge
+white_glm %>% hsls_tbl_view()
+```
+
+## Combined Table
+```{r}
+tbl_merge(
+  tbls = list(asian_tbl, black_tbl, indigenous_tbl, latinx_tbl, multi_tbl, white_tbl),
+  tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
+  ) %>% 
+  as_flex_table()
+```
+
+# UNIMPUTED WITH WEIGHTS
+
 ## Weight Data
 ```{r}
 library(survey)
@@ -59,6 +163,20 @@ df_brr <- svrepdesign(
   data = hsls,
   combined.weights = TRUE
 )
+```
+
+## Write Function
+```{r}
+glm_all <-svyglm(data = data,
+           p1honors ~ math_4level + 
+           par_exp + par_sch_inv +
+           first_gen + first_lang + frpl +
+           math_score + public + x1locale,
+           family = "binomial")
+jtools::summ(glm_all, exp = TRUE)
+
+
+glm_all %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
 ```
 
 ## Weighted Analysis for All: Panel Weights
