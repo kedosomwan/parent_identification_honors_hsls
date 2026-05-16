@@ -256,7 +256,7 @@ white_glm %>% hsls_tbl_view()
 ## Combined Table
 ```{r}
 tbl_merge(
-  tbls = list(asian_svy_tbl, black_svy_tbl, indigenous_svy_tbl, latinx_svy_tbl, multi_svy_tbl, white_svy_tbl),
+  tbls = list(asian_svytbl, black_svytbl, indigenous_svytbl, latinx_svytbl, multi_svytbl, white_svytbl),
   tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
