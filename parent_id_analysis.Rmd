@@ -8,28 +8,56 @@ date: "2026-04-17"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-## Racial/Ethnic Subgroups
+# UNWEIGHTED Racial/Ethnic Subgroups
 
 ### Write function
+```{r}
+run_hsls_glm <- function(data) {
+  with(data,   glm(
+    p1honors ~ math_3level + 
+      par_exp + par_sch_inv +
+      first_gen + first_lang + frpl +
+      math_score + public + urban,
+    family = "binomial"
+  ))
+}
+hsls_tbl_merge <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
+    add_glance_source_note() 
+}
+hsls_tbl_view <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = FALSE, hide_ci = FALSE) %>% 
+    add_glance_source_note() %>% 
+    as_flex_table()
+}
+
+```
+
+# WEIGHTED Racial/Ethnic Subgroups
+
+## Weight Data
+```{r}
+library(survey)
+
+df_svy <- svydesign(
+  data = hsls,
+  ids = ~stu_id,      # Use the tilde (~) for formulas
+  weights = ~w1parent # Use 'weights' instead of 'pweights'
+)
+df_brr <- svrepdesign(
+  weights = ~w1parent, 
+  repweights = "w1parent[0-9]+",
+  type = "BRR", 
+  data = hsls,
+  combined.weights = TRUE
+)
+```
+## Write function
 ```{r}
 
 ```
