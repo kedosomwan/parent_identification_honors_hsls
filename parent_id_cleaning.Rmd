@@ -41,8 +41,22 @@ hsls_na <- hsls_raw %>% filter(p1honors !=-8)
 hsls_na <- hsls_na %>% filter(s1mfall09 == 1) 
 ```
 
+## summarize original variables in model
 ```{r}
+hsls_model <- hsls_na %>% dplyr::select(p1honors, x3thimath, x1poverty185, x1duallang, x1control, x1locale, x1paredu, x1sex, x1race, p1ptomtg, p1schmtg, p1counselor, p1schevent, p1volunteer, p1fundraise, p1ptconfer, ends_with("m09"), x1txmtscor, x1txmquint)
 
+hsls_math <- hsls_raw %>% dplyr::select(ends_with("m09"))
+
+hsls_par <- hsls_raw %>% dplyr::select(p1honors, p1ptomtg, p1schmtg, p1counselor, p1schevent, p1volunteer, p1fundraise, p1ptconfer)
+
+
+hsls_par[hsls_par == -9] <- NA
+hsls_par[hsls_par == -8] <- NA
+hsls_par[hsls_par == -7] <- NA
+hsls_par[hsls_par == -6] <- NA
+hsls_par[hsls_par == -5] <- NA
+EFAtools::N_FACTORS(hsls_par)
+EFAtools::EFA(hsls_par, n_factors = 2)
 ```
 
 ```{r subset replace missing values with NA}
@@ -199,12 +213,10 @@ hsls <- hsls %>%
 # ---------------------------
 hsls <- hsls %>%
   mutate(
-    # par_mtg: binary numeric
-    par_mtg = ifelse((p1ptomtg == 1 | p1schmtg == 1), 1, 0),
 
     # par_sch_inv: count variable (numeric, Poisson-type)
-    par_sch_inv = par_mtg +
-                  p1counselor +
+    par_sch_inv = p1ptomtg +
+                  p1schmtg +
                   p1schevent +
                   p1volunteer +
                   p1fundraise +
