@@ -7,6 +7,22 @@ date: "2026-04-17"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# Prepare for Analysis
+
+## Load libraries
+```{r}
+library(tidyverse)
+library(mice)
+library(howManyImputations)
+library(gtsummary)
+library(survey)
+library(mitools)
+```
+
+## Load dataset
+```{r}
+load("df_imputed.rdata")
+```
 
 
 # UNWEIGHTED Racial/Ethnic Subgroups
@@ -37,7 +53,80 @@ hsls_tbl_view <- function(data){
 }
 
 ```
+## Asian American
+```{r}
+asian_imp <- filter(df_imp, stud_race == 1)
+asian_glm <- run_hsls_glm(asian_imp)
+asian_glm %>% hsls_tbl_view()
+asian_tbl <- asian_glm %>% hsls_tbl_merge
+how_many_imputations(asian_glm)
+```
 
+## Black
+```{r}
+# Create Black subset
+black_imp <- filter(df_imp, stud_race == 2)
+
+# Run Imputation & check how many needed
+black_glm <- black_imp %>% run_hsls_glm()
+black_glm %>% how_many_imputations()
+
+# Create Tables
+black_tbl <- black_glm %>% hsls_tbl_merge
+black_glm %>% hsls_tbl_view()
+```
+
+## Indigenous
+```{r}
+indigenous_imp <- filter(df_imp, stud_race == 3)
+
+# Run Imputation & check how many needed
+indigenous_glm <- indigenous_imp %>% run_hsls_glm()
+indigenous_glm %>% how_many_imputations()
+
+# Create Tables
+indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
+indigenous_glm %>% hsls_tbl_view()
+```
+
+## Latinx
+```{r}
+latinx_imp <- filter(df_imp, stud_race == 4)
+
+# Run Imputation & check how many needed
+latinx_glm <- latinx_imp %>% run_hsls_glm()
+latinx_glm %>% how_many_imputations()
+
+# Create Tables
+latinx_tbl <- latinx_glm %>% hsls_tbl_merge
+latinx_glm %>% hsls_tbl_view()
+```
+
+## Two or More Races
+```{r}
+multi_imp <- filter(df_imp, stud_race == 5)
+
+# Run Imputation & check how many needed
+multi_glm <- multi_imp %>% run_hsls_glm()
+multi_glm %>% how_many_imputations()
+
+# Create Tables
+multi_tbl <- multi_glm %>% hsls_tbl_merge
+multi_glm %>% hsls_tbl_view()
+```
+
+## White
+```{r}
+white_imp <- filter(df_imp, stud_race == 6)
+
+# Run Imputation & check how many needed
+white_glm <- white_imp %>% run_hsls_glm()
+white_glm %>% how_many_imputations()
+
+# Create Tables
+white_tbl <- white_glm %>% hsls_tbl_merge
+white_glm %>% hsls_tbl_view()
+```
 # WEIGHTED Racial/Ethnic Subgroups
 
 ## Weight Data
