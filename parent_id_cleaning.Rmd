@@ -43,9 +43,9 @@ hsls_na <- hsls_na %>% filter(s1mfall09 == 1)
 
 ## summarize original variables in model
 ```{r}
-hsls_model <- hsls_na %>% dplyr::select(p1honors, x3thimath, x1poverty185, x1duallang, x1control, x1locale, x1paredu, x1sex, x1race, p1ptomtg, p1schmtg, p1counselor, p1schevent, p1volunteer, p1fundraise, p1ptconfer, ends_with("m09"), x1txmtscor, x1txmquint)
+hsls_model <- hsls_na %>% dplyr::select(p1honors, x3thimath, x1poverty185, x1duallang, x1control, x1locale, x1paredu, x1sex, x1race, p1ptomtg, p1schmtg, p1schevent, p1volunteer, p1fundraise, p1ptconfer, ends_with("m09"), x1txmtscor, x1txmquint)
 
-hsls_math <- hsls_raw %>% dplyr::select(ends_with("m09"))
+hsls_model %>% drop_unused_value_labels() %>% haven::as_factor() %>%  tbl_summary()
 ```
 
 ```{r subset replace missing values with NA}
