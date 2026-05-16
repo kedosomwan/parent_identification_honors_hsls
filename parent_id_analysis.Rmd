@@ -42,12 +42,16 @@ run_hsls_glm <- function(data) {
     family = "binomial"
   ))
 }
+
+
 hsls_tbl_merge <- function(data){
   data %>% 
     tbl_regression(exp = TRUE) %>% 
     add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
     add_glance_table() 
 }
+
+
 hsls_tbl_view <- function(data){
   data %>% 
     tbl_regression(exp = TRUE) %>% 
@@ -144,14 +148,25 @@ tbl_merge(
 # WEIGHTED Racial/Ethnic Subgroups
 
 ## Weight Data
+
+### Create imputation list
+```{r}
+imp_list <- lapply(df_imp)
+```
+
+### Panel Weights
 ```{r}
 library(survey)
 
 df_svy <- svydesign(
-  data = hsls,
+  data = imputationList(df_imp),
   ids = ~stu_id,      # Use the tilde (~) for formulas
   weights = ~w1parent # Use 'weights' instead of 'pweights'
 )
+```
+
+### BRR Weights
+```{r}
 df_brr <- svrepdesign(
   weights = ~w1parent, 
   repweights = "w1parent[0-9]+",
@@ -160,14 +175,40 @@ df_brr <- svrepdesign(
   combined.weights = TRUE
 )
 ```
+
 ## Write function
 ```{r}
+hsls_svy_glm <- function(data) {
+  with(data,   svyglm(design = df_svy,
+    p1honors ~ math_3level + 
+      par_exp + par_sch_inv +
+      first_gen + first_lang + frpl +
+      math_score + public + urban,
+    family = "binomial"
+  ))
+}
 
+
+hsls_svy_merge <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
+    add_glance_table() 
+}
+
+
+hsls_svy_view <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = FALSE, hide_ci = FALSE) %>% 
+    add_glance_table() %>% 
+    as_flex_table()
+}
 ```
 
 ## Asian American
 ```{r}
-
+asian_imp %>% hsls_svy_glm()
 ```
 
 ## Black

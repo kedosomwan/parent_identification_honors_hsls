@@ -47,7 +47,7 @@ df$stud_race <- factor(df$stud_race)
 df$par_race <- factor(df$par_race)
 df$first_lang <- factor(df$first_lang)
 
-df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, w1parent)
+df_subset <- df %>% dplyr::select(stu_id, p1honors, par_exp, math_3level, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"))
 ```
 
 # Initial Run and Methods
