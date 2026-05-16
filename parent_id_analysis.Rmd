@@ -36,8 +36,8 @@ df <- haven::read_dta("gcq_hsls_subset.dta")
 ```{r}
 hsls_glm <- function(data) {
   glm(
-    p1honors ~ ordered(math_4level) + 
-      ordered(par_exp) + par_sch_inv +
+    p1honors ~ math4_level + 
+      par_exp + par_sch_inv +
       first_gen + as.factor(first_lang) + frpl +
       math_score + public + as.factor(x1locale),
     data = data,
@@ -167,33 +167,22 @@ df_brr <- svrepdesign(
 
 ## Write Function
 ```{r}
-#
-#hsls_glm_panel <- function(data) {
-#  svyglm(
-#    p1honors ~ math_4level + 
-#     par_exp + par_sch_inv +
-#      first_gen + factor(first_lang) + frpl +
-#      math_score + public + factor(x1locale),
-#    design = data,
-#    family = "binomial"
-#  )
-#}
-
-hsls_glm_brr <- function(data) {
+hsls_glm_svy <- function(data) {
   svyglm(
     p1honors ~ math_4level + 
-      as.numeric(par_exp) + par_sch_inv +
-      first_gen + first_lang + frpl +
-      math_score + public + x1locale,
+     par_exp + par_sch_inv +
+      first_gen + factor(first_lang) + frpl +
+      math_score + public + factor(x1locale),
     design = data,
     family = "binomial"
   )
 }
+
 ```
 ## Asian American
 ```{r}
 asian_svy <- subset(df_brr, stud_race == 1)
-asian_svyglm <- hsls_glm_brr(asian_svy)
+asian_svyglm <- hsls_glm_svy(asian_svy)
 asian_svyglm %>% hsls_tbl_view()
 asian_svytbl <- asian_svyglm %>% hsls_tbl_merge
 
@@ -202,10 +191,10 @@ asian_svytbl <- asian_svyglm %>% hsls_tbl_merge
 ## Black
 ```{r}
 # Create Black subset
-black <- filter(df, stud_race == 2)
+black_svy <- subset(df_brr, stud_race == 2)
 
 # Run Imputation & check how many needed
-black_svyglm <- black %>% hsls_glm_panel()
+black_svyglm <- black_svy %>% hsls_glm_svy()
 
 # Create Tables
 black_svytbl <- black_svyglm %>% hsls_tbl_merge
@@ -214,10 +203,10 @@ black_svyglm %>% hsls_tbl_view()
 
 ## Indigenous
 ```{r}
-indigenous <- filter(df, stud_race == 3)
+indigenous_svy <- subset(df_brr, stud_race == 3)
 
 # Run Imputation & check how many needed
-indigenous_svyglm <- indigenous %>% hsls_glm_panel()
+indigenous_svyglm <- indigenous_svy %>% hsls_glm_svy()
 
 
 # Create Tables
@@ -227,10 +216,10 @@ indigenous_svyglm %>% hsls_tbl_view()
 
 ## Latinx
 ```{r}
-latinx <- filter(df, stud_race == 4)
+latinx_svy <- subset(df_brr, stud_race == 4)
 
 # Run Imputation & check how many needed
-latinx_svyglm <- latinx %>% hsls_glm_panel()
+latinx_svyglm <- latinx_svy %>% hsls_glm_svy()
 
 
 # Create Tables
@@ -240,10 +229,10 @@ latinx_svyglm %>% hsls_tbl_view()
 
 ## Two or More Races
 ```{r}
-multi <- filter(df, stud_race == 5)
+multi_svy <- subset(df_brr, stud_race == 5)
 
 # Run Imputation & check how many needed
-multi_svyglm <- multi %>% hsls_glm_panel()
+multi_svyglm <- multi_svy %>% hsls_glm_svy()
 
 
 # Create Tables
@@ -253,10 +242,10 @@ multi_svyglm %>% hsls_tbl_view()
 
 ## White
 ```{r}
-white <- filter(df, stud_race == 6)
+white_svy <- subset(df_brr, stud_race == 6)
 
 # Run Imputation & check how many needed
-white_svyglm <- white %>% hsls_glm_panel()
+white_svyglm <- white_svy %>% hsls_glm_svy()
 
 
 # Create Tables
