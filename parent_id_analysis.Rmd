@@ -167,17 +167,17 @@ df_brr <- svrepdesign(
 
 ## Write Function
 ```{r}
-
-hsls_glm_panel <- function(data) {
-  svyglm(
-    p1honors ~ math_4level + 
-     par_exp + par_sch_inv +
-      first_gen + factor(first_lang) + frpl +
-      math_score + public + factor(x1locale),
-    design = data,
-    family = "binomial"
-  )
-}
+#
+#hsls_glm_panel <- function(data) {
+#  svyglm(
+#    p1honors ~ math_4level + 
+#     par_exp + par_sch_inv +
+#      first_gen + factor(first_lang) + frpl +
+#      math_score + public + factor(x1locale),
+#    design = data,
+#    family = "binomial"
+#  )
+#}
 
 hsls_glm_brr <- function(data) {
   svyglm(
