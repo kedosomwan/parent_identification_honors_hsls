@@ -87,10 +87,10 @@ save(df_imp, file = "df_imputed.rdata")
 
 run_hsls_glm <- function(data) {
   with(data,   glm(
-    p1honors ~ math_3level + 
-      par_exp + par_sch_inv +
-      first_gen + first_lang + frpl +
-      math_score + public + urban,
+    p1honors ~ as.numeric(math_4level) + 
+      as.numeric(par_exp) + par_sch_inv +
+      female + par_ba + factor(first_lang) + frpl +
+      math_score + public + factor(x1locale),
     family = "binomial"
   ))
 }
