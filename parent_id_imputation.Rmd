@@ -65,7 +65,7 @@ df_imp <- mice(
 )
 
 # Save the imputed data
-#save(df_imp, file = "df_imputed.rdata")
+save(df_imp, file = "df_imputed.rdata")
 
 # Load imputed data
 #load("df_imputed.rdata")
