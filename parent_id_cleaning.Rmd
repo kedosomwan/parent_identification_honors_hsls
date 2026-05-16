@@ -109,6 +109,7 @@ hsls <- hsls %>%
 
     # math_score: continuous numeric
     math_score = ifelse(x1txmquint < 0, NA, x1txmtscor),
+    math_quintile = x1txmquint,
 
     # public: binary numeric (1 = public, 0 = private)
     public = case_when(
