@@ -190,7 +190,88 @@ hsls_glm_brr <- function(data) {
   )
 }
 ```
+## Asian American
+```{r}
+asian <- filter(df, stud_race == 1)
+asian_svyglm <- hsls_glm_panel(asian)
+asian_svyglm %>% hsls_tbl_view()
+asian_svytbl <- asian_svyglm %>% hsls_tbl_merge
 
+```
+
+## Black
+```{r}
+# Create Black subset
+black <- filter(df, stud_race == 2)
+
+# Run Imputation & check how many needed
+black_svyglm <- black %>% hsls_glm_panel()
+
+# Create Tables
+black_svytbl <- black_svyglm %>% hsls_tbl_merge
+black_svyglm %>% hsls_tbl_view()
+```
+
+## Indigenous
+```{r}
+indigenous <- filter(df, stud_race == 3)
+
+# Run Imputation & check how many needed
+indigenous_svyglm <- indigenous %>% hsls_glm_panel()
+
+
+# Create Tables
+indigenous_tbl <- indigenous_svyglm %>% hsls_tbl_merge
+indigenous_svyglm %>% hsls_tbl_view()
+```
+
+## Latinx
+```{r}
+latinx <- filter(df, stud_race == 4)
+
+# Run Imputation & check how many needed
+latinx_svyglm <- latinx %>% hsls_glm_panel()
+
+
+# Create Tables
+latinx_svytbl <- latinx_svyglm %>% hsls_tbl_merge
+latinx_svyglm %>% hsls_tbl_view()
+```
+
+## Two or More Races
+```{r}
+multi <- filter(df, stud_race == 5)
+
+# Run Imputation & check how many needed
+multi_svyglm <- multi %>% hsls_glm_panel()
+
+
+# Create Tables
+multi_svytbl <- multi_svyglm %>% hsls_tbl_merge
+multi_svyglm %>% hsls_tbl_view()
+```
+
+## White
+```{r}
+white <- filter(df, stud_race == 6)
+
+# Run Imputation & check how many needed
+white_svyglm <- white %>% hsls_glm_panel()
+
+
+# Create Tables
+white_svytbl <- white_glm %>% hsls_tbl_merge
+white_glm %>% hsls_tbl_view()
+```
+
+## Combined Table
+```{r}
+tbl_merge(
+  tbls = list(asian_svy_tbl, black_svy_tbl, indigenous_svy_tbl, latinx_svy_tbl, multi_svy_tbl, white_svy_tbl),
+  tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
+  ) %>% 
+  as_flex_table()
+```
 ## Weighted Analysis for All: Panel Weights
 ```{r}
 glm_all_panel <-       svyglm(design = df_svy,
