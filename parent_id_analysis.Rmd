@@ -38,7 +38,7 @@ hsls_glm <- function(data) {
   glm(
     p1honors ~ math_4level + 
       par_exp + par_sch_inv +
-      first_gen + as.factor(first_lang) + frpl +
+      par_ba + as.factor(first_lang) + frpl +
       math_score + public + as.factor(x1locale),
     data = data,
     family = "binomial"
@@ -171,8 +171,8 @@ hsls_glm_svy <- function(data) {
   svyglm(
     p1honors ~ math_4level + 
      par_exp + par_sch_inv +
-      first_gen + factor(first_lang) + frpl +
-      math_score + public + factor(x1locale),
+     par_ba + factor(first_lang) + frpl +
+     math_score + public + factor(x1locale),
     design = data,
     family = "binomial"
   )
@@ -290,10 +290,10 @@ glm_all_brr %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = 
 ```{r}
 hsls_glm_imp <- function(data) {
   with(data,   glm(
-    p1honors ~ as.numeric(math_3level) + 
-      as.numeric(par_exp) + par_sch_inv +
-      first_gen + first_lang + frpl +
-      math_score + public + urban,
+    p1honors ~ math_4level + 
+      par_exp + par_sch_inv +
+      first_gen + factor(first_lang) + frpl +
+      math_score + public + factor(x1locale),
     family = "binomial"
   ))
 }
@@ -412,9 +412,16 @@ imp_list <- lapply(df_imp)
 ### Panel Weights
 ```{r}
 library(survey)
+library(mitools)
 
-df_svy <- svydesign(
-  data = imputationList(df_imp),
+# Creates a list of completed dataset for survey weights
+imp_list <- imputationList(
+  lapply(1:df_imp$m, function(i) complete(df_imp, i))
+)
+
+
+df_svy_imp <- svydesign(
+  data = imp_list,
   ids = ~stu_id,      # Use the tilde (~) for formulas
   weights = ~w1parent # Use 'weights' instead of 'pweights'
 )
@@ -422,11 +429,11 @@ df_svy <- svydesign(
 
 ### BRR Weights
 ```{r}
-df_brr <- svrepdesign(
+df_brr_imp <- svrepdesign(
   weights = ~w1parent, 
   repweights = "w1parent[0-9]+",
   type = "BRR", 
-  data = hsls,
+  data = imp_list,
   combined.weights = TRUE
 )
 ```
