@@ -34,11 +34,11 @@ df_stata <- haven::read_dta("gcq_hsls_subset.dta")
 df <- df_stata %>% mutate(
   first_gen = factor(first_gen, levels = c(0,1)),
   exp_ba = factor(exp_ba, levels = c(0,1)),
-  frpl = factor(frpl, levels = c(0,1))
+  frpl = factor(frpl, levels = c(0,1)),
+  p1honors = factor(p1honors, levels = c(0,1))
 ) 
 
 # Ordinal must be ordered factors
-df$math_3level <- ordered(df$math_3level)
 df$math_4level <- ordered(df$math_4level)
 df$par_exp     <- ordered(df$par_exp)
 df$pov_level <- ordered(df$pov_level)
@@ -49,7 +49,8 @@ df$stud_race <- factor(df$stud_race)
 df$par_race <- factor(df$par_race)
 df$first_lang <- factor(df$first_lang)
 
-df_subset <- df %>% dplyr::select(stu_id, p1honors, par_exp, math_3level, math_quintile, math_4level, par_sch_inv, first_gen, first_lang, frpl, math_score, public, urban, stud_race, starts_with("w1"))
+df_subset <- df %>% dplyr::select(stu_id, p1honors, par_exp, math_4level, par_sch_inv, par_ba, first_lang, frpl, math_score, public, x1locale, stud_race, starts_with("w1"))
+colSums(is.na(df_subset))
 ```
 
 # Initial Run and Methods
