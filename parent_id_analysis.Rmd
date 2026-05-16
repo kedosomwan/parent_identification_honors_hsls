@@ -28,8 +28,63 @@ library(mitools)
 load("df_imputed.rdata")
 ```
 
+# UNIMPUTED
 
-# UNWEIGHTED Racial/Ethnic Subgroups
+## Run Data for All, Unweighted
+```{r}
+glm_all <-glm(data = hsls,
+           p1honors ~ math_4level + 
+           par_exp + par_race + par_sch_inv +
+           first_gen + first_lang + frpl +
+           math_score + public + urban,
+           family = "binomial")
+jtools::summ(glm_all, exp = TRUE)
+
+
+glm_all %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
+```
+## Weight Data
+```{r}
+library(survey)
+
+df_svy <- svydesign(
+  data = hsls,
+  ids = ~stu_id,      # Use the tilde (~) for formulas
+  weights = ~w1parent # Use 'weights' instead of 'pweights'
+)
+df_brr <- svrepdesign(
+  weights = ~w1parent, 
+  repweights = "w1parent[0-9]+",
+  type = "BRR", 
+  data = hsls,
+  combined.weights = TRUE
+)
+```
+
+## Weighted Analysis for All: Panel Weights
+```{r}
+glm_all_panel <-       svyglm(design = df_svy,
+                        p1honors ~ math_4level + 
+                        par_exp + par_race + par_sch_inv +
+                        first_gen + first_lang + frpl +
+                        math_score + public + urban,
+                        family = "binomial")
+glm_all_panel %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
+```
+
+## Weighted Analysis for All: BRR weights
+```{r}
+glm_all_brr <-       svyglm(design = df_brr,
+                        p1honors ~ math_4level + 
+                        par_exp + par_race + par_sch_inv +
+                        first_gen + first_lang + frpl +
+                        math_score + public + urban,
+                        family = "binomial")
+glm_all_brr %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
+```
+# IMPUTED 
+
+## UNWEIGHTED Racial/Ethnic Subgroups
 
 ### Write function
 ```{r}
