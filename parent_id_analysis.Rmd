@@ -65,7 +65,7 @@ hsls_tbl_view <- function(data){
 ## Asian American
 ```{r}
 asian <- filter(df, stud_race == 1)
-asian_glm <- run_hsls_glm(asian)
+asian_glm <- hsls_glm_imp(asian)
 asian_glm %>% hsls_tbl_view()
 asian_tbl <- asian_glm %>% hsls_tbl_merge
 how_manyutations(asian_glm)
@@ -77,7 +77,7 @@ how_manyutations(asian_glm)
 black <- filter(df, stud_race == 2)
 
 # Run Imputation & check how many needed
-black_glm <- black %>% run_hsls_glm()
+black_glm <- black %>% hsls_glm_imp()
 
 # Create Tables
 black_tbl <- black_glm %>% hsls_tbl_merge
@@ -89,7 +89,7 @@ black_glm %>% hsls_tbl_view()
 indigenous <- filter(df, stud_race == 3)
 
 # Run Imputation & check how many needed
-indigenous_glm <- indigenous %>% run_hsls_glm()
+indigenous_glm <- indigenous %>% hsls_glm_imp()
 
 
 # Create Tables
@@ -102,7 +102,7 @@ indigenous_glm %>% hsls_tbl_view()
 latinx <- filter(df, stud_race == 4)
 
 # Run Imputation & check how many needed
-latinx_glm <- latinx %>% run_hsls_glm()
+latinx_glm <- latinx %>% hsls_glm_imp()
 
 
 # Create Tables
@@ -115,7 +115,7 @@ latinx_glm %>% hsls_tbl_view()
 multi <- filter(df, stud_race == 5)
 
 # Run Imputation & check how many needed
-multi_glm <- multi %>% run_hsls_glm()
+multi_glm <- multi %>% hsls_glm_imp()
 
 
 # Create Tables
@@ -128,7 +128,7 @@ multi_glm %>% hsls_tbl_view()
 white <- filter(df, stud_race == 6)
 
 # Run Imputation & check how many needed
-white_glm <- white %>% run_hsls_glm()
+white_glm <- white %>% hsls_glm_imp()
 
 
 # Create Tables
@@ -218,7 +218,7 @@ glm_all_brr %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = 
 
 ### Write function
 ```{r}
-run_hsls_glm <- function(data) {
+hsls_glm_imp <- function(data) {
   with(data,   glm(
     p1honors ~ as.numeric(math_3level) + 
       as.numeric(par_exp) + par_sch_inv +
@@ -249,7 +249,7 @@ hsls_tbl_view <- function(data){
 ## Asian American
 ```{r}
 asian_imp <- filter(df_imp, stud_race == 1)
-asian_glm <- run_hsls_glm(asian_imp)
+asian_glm <- hsls_glm_imp(asian_imp)
 asian_glm %>% hsls_tbl_view()
 asian_tbl <- asian_glm %>% hsls_tbl_merge
 how_many_imputations(asian_glm)
@@ -261,7 +261,7 @@ how_many_imputations(asian_glm)
 black_imp <- filter(df_imp, stud_race == 2)
 
 # Run Imputation & check how many needed
-black_glm <- black_imp %>% run_hsls_glm()
+black_glm <- black_imp %>% hsls_glm_imp()
 black_glm %>% how_many_imputations()
 
 # Create Tables
@@ -274,7 +274,7 @@ black_glm %>% hsls_tbl_view()
 indigenous_imp <- filter(df_imp, stud_race == 3)
 
 # Run Imputation & check how many needed
-indigenous_glm <- indigenous_imp %>% run_hsls_glm()
+indigenous_glm <- indigenous_imp %>% hsls_glm_imp()
 indigenous_glm %>% how_many_imputations()
 
 # Create Tables
@@ -287,7 +287,7 @@ indigenous_glm %>% hsls_tbl_view()
 latinx_imp <- filter(df_imp, stud_race == 4)
 
 # Run Imputation & check how many needed
-latinx_glm <- latinx_imp %>% run_hsls_glm()
+latinx_glm <- latinx_imp %>% hsls_glm_imp()
 latinx_glm %>% how_many_imputations()
 
 # Create Tables
@@ -300,7 +300,7 @@ latinx_glm %>% hsls_tbl_view()
 multi_imp <- filter(df_imp, stud_race == 5)
 
 # Run Imputation & check how many needed
-multi_glm <- multi_imp %>% run_hsls_glm()
+multi_glm <- multi_imp %>% hsls_glm_imp()
 multi_glm %>% how_many_imputations()
 
 # Create Tables
@@ -313,7 +313,7 @@ multi_glm %>% hsls_tbl_view()
 white_imp <- filter(df_imp, stud_race == 6)
 
 # Run Imputation & check how many needed
-white_glm <- white_imp %>% run_hsls_glm()
+white_glm <- white_imp %>% hsls_glm_imp()
 white_glm %>% how_many_imputations()
 
 # Create Tables
