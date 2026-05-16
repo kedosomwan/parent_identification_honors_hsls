@@ -29,8 +29,8 @@ df_stata <- haven::read_dta("gcq_hsls_subset.dta")
 ## Binary should be be 0/1 factor for logreg
 df <- df_stata %>% mutate(
   first_gen = factor(first_gen, levels = c(0,1)),
-  exp_ba = factor(exp_ba, levels = c(0,1),
-  frpl = factor(frpl, levels = c(0,1)))
+  exp_ba = factor(exp_ba, levels = c(0,1)),
+  frpl = factor(frpl, levels = c(0,1))
 ) 
 
 # Ordinal must be ordered factors
@@ -53,10 +53,6 @@ df_subset <- df %>% dplyr::select(p1honors, par_exp, math_3level, par_race, par_
 init <- mice(df_subset, maxit = 0)
 meth <- init$method
 meth
-
-init_nw <- mice(df_nw, maxit = 0)
-meth_nw <- init_nw$method
-meth_nw
 ```
 
 
@@ -64,7 +60,7 @@ meth_nw
 # Run chained equations imputation
 df_imp <- mice(
   df_subset,
-  m        = 5,     
+  m        = 20,     
   seed     = 123
 )
 
@@ -72,7 +68,7 @@ df_imp <- mice(
 #save(df_imp, file = "df_imputed.rdata")
 
 # Load imputed data
-load("df_imputed.rdata")
+#load("df_imputed.rdata")
 ```
 
 ## Racial/Ethnic Subgroups
