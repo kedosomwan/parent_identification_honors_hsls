@@ -26,7 +26,7 @@ library(mitools)
 ## Load dataset
 ```{r}
 load("df_imputed.rdata")
-hsls <- haven::read_dta("gcq_hsls_subset.dta")
+df <- haven::read_dta("gcq_hsls_subset.dta")
 ```
 
 # UNIMPUTED - NO WEIGHTS
@@ -167,16 +167,28 @@ df_brr <- svrepdesign(
 
 ## Write Function
 ```{r}
-glm_all <-svyglm(data = data,
-           p1honors ~ math_4level + 
-           par_exp + par_sch_inv +
-           first_gen + first_lang + frpl +
-           math_score + public + x1locale,
-           family = "binomial")
-jtools::summ(glm_all, exp = TRUE)
 
+hsls_glm_panel <- function(data) {
+  svyglm(
+    p1honors ~ math_4level + 
+      as.numeric(par_exp) + par_sch_inv +
+      first_gen + first_lang + frpl +
+      math_score + public + x1locale,
+    design = df_svy,
+    family = "binomial"
+  )
+}
 
-glm_all %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% add_glance_table() %>% as_flex_table()
+hsls_glm_brr <- function(data) {
+  svyglm(
+    p1honors ~ math_4level + 
+      as.numeric(par_exp) + par_sch_inv +
+      first_gen + first_lang + frpl +
+      math_score + public + x1locale,
+    design = df_brr,
+    family = "binomial"
+  )
+}
 ```
 
 ## Weighted Analysis for All: Panel Weights
