@@ -49,14 +49,14 @@ hsls_math <- hsls_raw %>% dplyr::select(ends_with("m09"))
 
 hsls_par <- hsls_raw %>% dplyr::select(p1honors, p1ptomtg, p1schmtg, p1counselor, p1schevent, p1volunteer, p1fundraise, p1ptconfer)
 
-
-hsls_par[hsls_par == -9] <- NA
-hsls_par[hsls_par == -8] <- NA
-hsls_par[hsls_par == -7] <- NA
-hsls_par[hsls_par == -6] <- NA
-hsls_par[hsls_par == -5] <- NA
-EFAtools::N_FACTORS(hsls_par)
-EFAtools::EFA(hsls_par, n_factors = 2)
+## running EFA on the parent related variables
+# hsls_par[hsls_par == -9] <- NA
+# hsls_par[hsls_par == -8] <- NA
+# hsls_par[hsls_par == -7] <- NA
+# hsls_par[hsls_par == -6] <- NA
+# hsls_par[hsls_par == -5] <- NA
+# EFAtools::N_FACTORS(hsls_par)
+# EFAtools::EFA(hsls_par, n_factors = 2)
 ```
 
 ```{r subset replace missing values with NA}
