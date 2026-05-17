@@ -404,11 +404,6 @@ tbl_merge(
 
 ## Weight Data
 
-### Create imputation list
-```{r}
-imp_list <- lapply(df_imp)
-```
-
 ### Panel Weights
 ```{r}
 library(survey)
