@@ -69,7 +69,7 @@ start_time <- Sys.time()
 df_imp <- mice(
   df_subset,
   m        = 25, # asian model says 22 imputations and indigenous says 25     
-  seed     = 123
+  seed     = 1234567
 )
 end_time <- Sys.time()
 end_time - start_time
