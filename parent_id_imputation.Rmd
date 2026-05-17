@@ -68,7 +68,7 @@ start_time <- Sys.time()
 # Run chained equations imputation
 df_imp <- mice(
   df_subset,
-  m        = 20,     
+  m        = 25, # asian model says 22 imputations and indigenous says 25     
   seed     = 123
 )
 end_time <- Sys.time()
