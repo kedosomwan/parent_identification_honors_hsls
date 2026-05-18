@@ -179,6 +179,8 @@ df_brr <- svrepdesign(
   data = df,
   combined.weights = TRUE
 )
+
+
 ```
 
 ### Write Function
@@ -198,7 +200,11 @@ hsls_glm_svy <- function(data) {
 ### Asian American
 ```{r}
 asian_svy <- subset(df_brr, stud_race == 1)
+
 asian_svyglm <- hsls_glm_svy(asian_svy)
+asian_svyglm %>% poliscidata::fit.svyglm()
+
+
 asian_svyglm %>% hsls_tbl_view()
 asian_svytbl <- asian_svyglm %>% hsls_tbl_merge
 
@@ -209,8 +215,10 @@ asian_svytbl <- asian_svyglm %>% hsls_tbl_merge
 # Create Black subset
 black_svy <- subset(df_brr, stud_race == 2)
 
-# Run Imputation & check how many needed
+# Run model and get R-squared
 black_svyglm <- black_svy %>% hsls_glm_svy()
+black_svyglm %>% poliscidata::fit.svyglm()
+
 
 # Create Tables
 black_svytbl <- black_svyglm %>% hsls_tbl_merge
@@ -221,7 +229,7 @@ black_svyglm %>% hsls_tbl_view()
 ```{r, eval = FALSE}
 indigenous_svy <- subset(df_brr, stud_race == 3)
 
-# Run Imputation & check how many needed
+# Run model and get R-squared
 indigenous_svyglm <- indigenous_svy %>% hsls_glm_svy()
 
 
@@ -236,7 +244,7 @@ latinx_svy <- subset(df_brr, stud_race == 4)
 
 # Run Imputation & check how many needed
 latinx_svyglm <- latinx_svy %>% hsls_glm_svy()
-
+latinx_svyglm %>% poliscidata::fit.svyglm()
 
 # Create Tables
 latinx_svytbl <- latinx_svyglm %>% hsls_tbl_merge
@@ -249,7 +257,7 @@ multi_svy <- subset(df_brr, stud_race == 5)
 
 # Run Imputation & check how many needed
 multi_svyglm <- multi_svy %>% hsls_glm_svy()
-
+multi_svyglm %>% poliscidata::fit.svyglm()
 
 # Create Tables
 multi_svytbl <- multi_svyglm %>% hsls_tbl_merge
@@ -262,10 +270,10 @@ white_svy <- subset(df_brr, stud_race == 6)
 
 # Run Imputation & check how many needed
 white_svyglm <- white_svy %>% hsls_glm_svy()
-
+white_svyglm %>% poliscidata::fit.svyglm()
 
 # Create Tables
-white_svytbl <- white_glm %>% hsls_tbl_merge
+white_svytbl <- white_svyglm %>% hsls_tbl_merge
 white_glm %>% hsls_tbl_view()
 ```
 
