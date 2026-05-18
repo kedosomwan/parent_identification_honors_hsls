@@ -47,8 +47,8 @@ df_summ %>% gtsummary::tbl_summary(by = stud_race, type = list(all_continuous() 
 ```{r}
 hsls_glm <- function(data) {
   glm(
-    p1honors ~ math_4level + 
-      par_exp + par_sch_inv +
+    p1honors ~ as.numeric(math_4level) + 
+      as.numeric(par_exp) + as.numeric(par_sch_inv) +
       female + par_ba + as.factor(first_lang) + frpl +
       math_score + public + as.factor(x1locale),
     data = data,
@@ -180,11 +180,11 @@ df_brr <- svrepdesign(
 ```{r}
 hsls_glm_svy <- function(data) {
   svyglm(
-    p1honors ~ math_4level + 
-     par_exp + par_sch_inv +
-     female + par_ba + factor(first_lang) + frpl +
-     math_score + public + factor(x1locale),
-    design = data,
+    p1honors ~ as.numeric(math_4level) + 
+      as.numeric(par_exp) + as.numeric(par_sch_inv) +
+      female + par_ba + as.factor(first_lang) + frpl +
+      math_score + public + as.factor(x1locale),
+    data = data,
     family = "quasibinomial"
   )
 }
@@ -297,15 +297,17 @@ glm_all_brr %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = 
 
 ## UNWEIGHTED Racial/Ethnic Subgroups
 
-### Write function
+## Write function
 ```{r}
 hsls_glm_imp <- function(data) {
-  with(data,   glm(
-    p1honors ~ math_4level + 
-      par_exp + par_sch_inv +
-      female + par_ba + factor(first_lang) + frpl +
-      math_score + public + factor(x1locale),
-    family = "quasibinomial"
+  with(data,     
+       glm(
+         p1honors ~ as.numeric(math_4level) + 
+         as.numeric(par_exp) + as.numeric(par_sch_inv) +
+         female + par_ba + as.factor(first_lang) + frpl +
+         math_score + public + as.factor(x1locale),
+         data = data,
+         family = "quasibinomial"
   ))
 }
 
@@ -413,9 +415,7 @@ tbl_merge(
 
 # WEIGHTED Racial/Ethnic Subgroups
 
-## Weight Data
-
-### Panel Weights
+## BRR Weight Data
 ```{r}
 library(survey)
 library(mitools)
@@ -425,23 +425,13 @@ imp_list <- imputationList(
   lapply(1:df_imp$m, function(i) complete(df_imp, i))
 )
 
-
-df_svy_imp <- svydesign(
-  data = imp_list,
-  ids = ~stu_id,      # Use the tilde (~) for formulas
-  weights = ~w1parent # Use 'weights' instead of 'pweights'
-)
-```
-
-### BRR Weights
-```{r}
 df_brr_imp <- svrepdesign(
   weights = ~w1parent, 
   repweights = "w1parent[0-9]+",
   type = "BRR", 
   data = imp_list,
   combined.weights = TRUE
-)
+) 
 ```
 
 ## Write function
@@ -449,12 +439,13 @@ df_brr_imp <- svrepdesign(
 
 # function to run model
 hsls_glm_svy_imp <- function(data) {
-  with(data,   svyglm(
-    p1honors ~ as.numeric(math_4level) + 
-      as.numeric(par_exp) + as.numeric(par_sch_inv) +
-      female + par_ba + factor(first_lang) + frpl +
-      math_score + public + factor(x1locale),
-    family = "quasibinomial"
+  with(data,   
+       svyglm(
+       p1honors ~ as.numeric(math_4level) + 
+       as.numeric(par_exp) + as.numeric(par_sch_inv) +
+       female + par_ba + as.factor(first_lang) + frpl +
+       math_score + public + as.factor(x1locale),
+       family = "quasibinomial"
   ))
 }
 
@@ -505,8 +496,8 @@ black_brr_imp_df <- make_mi_table(black_svyglm_pooled)
 black_brr_imp_df <- black_brr_imp_df %>% mutate(race = "Black", model = "weighted") # add race and weighted model
 ```
 
-## Indigenousm - Does not converge
-```{r}
+## Indigenous - Does not converge
+```{r, eval = FALSE}
 indigenous_brr_imp <- subset(df_brr_imp, stud_race == 3)
 
 indigenous_svyglm_imp <- hsls_glm_svy_imp(indigenous_brr_imp)
