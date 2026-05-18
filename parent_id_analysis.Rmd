@@ -148,13 +148,22 @@ white_tbl <- white_glm %>% hsls_tbl_merge
 white_glm %>% hsls_tbl_view()
 ```
 
-### Combined Table
+
+### Combined Tables
 ```{r}
+# combined table publication ready with a few modifications
 tbl_merge(
   tbls = list(asian_tbl, black_tbl, indigenous_tbl, latinx_tbl, multi_tbl, white_tbl),
   tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
+
+# combined table with model fit 
+export_summs(
+  asian_glm, black_glm, indigenous_glm, latinx_glm, multi_glm, white_glm, 
+  model.names = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White"), 
+  statistics = "all"
+  )
 ```
 
 
@@ -208,8 +217,8 @@ black_svytbl <- black_svyglm %>% hsls_tbl_merge
 black_svyglm %>% hsls_tbl_view()
 ```
 
-### Indigenous
-```{r}
+### Indigenous - Doesn't converge so not included in document
+```{r, eval = FALSE}
 indigenous_svy <- subset(df_brr, stud_race == 3)
 
 # Run Imputation & check how many needed
@@ -262,9 +271,11 @@ white_glm %>% hsls_tbl_view()
 
 ### Combined Table
 ```{r}
+
+# publication ready table
 tbl_merge(
-  tbls = list(asian_svytbl, black_svytbl, indigenous_svytbl, latinx_svytbl, multi_svytbl, white_svytbl),
-  tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
+  tbls = list(asian_svytbl, black_svytbl, latinx_svytbl, multi_svytbl, white_svytbl),
+  tab_spanner = c("Asian American", "Black", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
 ```
@@ -285,14 +296,30 @@ hsls_glm_imp <- function(data) {
          family = "quasibinomial"
   ))
 }
+
+hsls_tbl_imp_merge <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
+    add_glance_table() 
+}
+
+
+hsls_tbl_imp_view <- function(data){
+  data %>% 
+    tbl_regression(exp = TRUE) %>% 
+    add_significance_stars(hide_se = FALSE, hide_p = FALSE, hide_ci = FALSE) %>% 
+    add_glance_table() %>% 
+    as_flex_table()
+}
 ```
 ### Asian American
 ```{r}
 asian_imp <- filter(df_imp, stud_race == 1)
-asian_glm <- hsls_glm_imp(asian_imp)
-asian_glm %>% hsls_tbl_view()
-asian_tbl <- asian_glm %>% hsls_tbl_merge
-how_many_imputations(asian_glm)
+asian_glm_imp <- hsls_glm_imp(asian_imp)
+asian_glm_imp %>% hsls_tbl_imp_view()
+asian_tbl_imp <- asian_glm_imp %>% hsls_tbl_imp_merge
+how_many_imputations(asian_glm_imp)
 ```
 
 ### Black
@@ -301,12 +328,12 @@ how_many_imputations(asian_glm)
 black_imp <- filter(df_imp, stud_race == 2)
 
 # Run Imputation & check how many needed
-black_glm <- black_imp %>% hsls_glm_imp()
-black_glm %>% how_many_imputations()
+black_glm_imp <- black_imp %>% hsls_glm_imp()
+black_glm_imp %>% how_many_imputations()
 
 # Create Tables
-black_tbl <- black_glm %>% hsls_tbl_merge
-black_glm %>% hsls_tbl_view()
+black_tbl_imp <- black_glm_imp %>% hsls_tbl_imp_merge
+black_glm_imp %>% hsls_tbl_imp_view()
 ```
 
 ### Indigenous
@@ -314,12 +341,12 @@ black_glm %>% hsls_tbl_view()
 indigenous_imp <- filter(df_imp, stud_race == 3)
 
 # Run Imputation & check how many needed
-indigenous_glm <- indigenous_imp %>% hsls_glm_imp()
-indigenous_glm %>% how_many_imputations()
+indigenous_glm_imp <- indigenous_imp %>% hsls_glm_imp()
+indigenous_glm_imp %>% how_many_imputations()
 
 # Create Tables
-indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
-indigenous_glm %>% hsls_tbl_view()
+indigenous_tbl_imp <- indigenous_glm_imp %>% hsls_tbl_imp_merge
+indigenous_glm_imp %>% hsls_tbl_imp_view()
 ```
 
 ### Latinx
@@ -327,12 +354,12 @@ indigenous_glm %>% hsls_tbl_view()
 latinx_imp <- filter(df_imp, stud_race == 4)
 
 # Run Imputation & check how many needed
-latinx_glm <- latinx_imp %>% hsls_glm_imp()
-latinx_glm %>% how_many_imputations()
+latinx_glm_imp <- latinx_imp %>% hsls_glm_imp()
+latinx_glm_imp %>% how_many_imputations()
 
 # Create Tables
-latinx_tbl <- latinx_glm %>% hsls_tbl_merge
-latinx_glm %>% hsls_tbl_view()
+latinx_tbl_imp <- latinx_glm_imp %>% hsls_tbl_imp_merge
+latinx_glm_imp %>% hsls_tbl_imp_view()
 ```
 
 ### Two or More Races
@@ -340,12 +367,12 @@ latinx_glm %>% hsls_tbl_view()
 multi_imp <- filter(df_imp, stud_race == 5)
 
 # Run Imputation & check how many needed
-multi_glm <- multi_imp %>% hsls_glm_imp()
-multi_glm %>% how_many_imputations()
+multi_glm_imp <- multi_imp %>% hsls_glm_imp()
+multi_glm_imp %>% how_many_imputations()
 
 # Create Tables
-multi_tbl <- multi_glm %>% hsls_tbl_merge
-multi_glm %>% hsls_tbl_view()
+multi_tbl_imp <- multi_glm_imp %>% hsls_tbl_imp_merge
+multi_glm_imp %>% hsls_tbl_imp_view()
 ```
 
 ### White
@@ -353,18 +380,18 @@ multi_glm %>% hsls_tbl_view()
 white_imp <- filter(df_imp, stud_race == 6)
 
 # Run Imputation & check how many needed
-white_glm <- white_imp %>% hsls_glm_imp()
-white_glm %>% how_many_imputations()
+white_glm_imp <- white_imp %>% hsls_glm_imp()
+white_glm_imp %>% how_many_imputations()
 
 # Create Tables
-white_tbl <- white_glm %>% hsls_tbl_merge
-white_glm %>% hsls_tbl_view()
+white_tbl_imp <- white_glm_imp %>% hsls_tbl_imp_merge
+white_glm_imp %>% hsls_tbl_imp_view()
 ```
 
 ### Combined Table
 ```{r}
 tbl_merge(
-  tbls = list(asian_tbl, black_tbl, indigenous_tbl, latinx_tbl, multi_tbl, white_tbl),
+  tbls = list(asian_tbl_imp, black_tbl_imp, indigenous_tbl_imp, latinx_tbl_imp, multi_tbl_imp, white_tbl_imp),
   tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
