@@ -162,11 +162,6 @@ tbl_merge(
 ```{r}
 library(survey)
 
-df_svy <- svydesign(
-  data = df,
-  ids = ~stu_id,      # Use the tilde (~) for formulas
-  weights = ~w1parent # Use 'weights' instead of 'pweights'
-)
 df_brr <- svrepdesign(
   weights = ~w1parent, 
   repweights = "w1parent[0-9]+",
@@ -184,7 +179,7 @@ hsls_glm_svy <- function(data) {
       as.numeric(par_exp) + as.numeric(par_sch_inv) +
       female + par_ba + as.factor(first_lang) + frpl +
       math_score + public + as.factor(x1locale),
-    data = data,
+      design = data,
     family = "quasibinomial"
   )
 }
@@ -271,27 +266,6 @@ tbl_merge(
   tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
-```
-## Weighted Analysis for All: Panel Weights
-```{r}
-glm_all_panel <-       svyglm(design = df_svy,
-                        p1honors ~ math_4level + 
-                        par_exp + par_race + par_sch_inv +
-                        first_gen + first_lang + frpl +
-                        math_score + public + urban,
-                        family = "quasibinomial")
-glm_all_panel %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
-```
-
-## Weighted Analysis for All: BRR weights
-```{r}
-glm_all_brr <-       svyglm(design = df_brr,
-                        p1honors ~ math_4level + 
-                        par_exp + par_race + par_sch_inv +
-                        first_gen + first_lang + frpl +
-                        math_score + public + urban,
-                        family = "quasibinomial")
-glm_all_brr %>% tbl_regression(exp = TRUE) %>% add_significance_stars(hide_ci = FALSE, hide_se = FALSE, hide_p = FALSE) %>% as_flex_table()
 ```
 # IMPUTED 
 
@@ -495,7 +469,7 @@ black_brr_imp_df <- make_mi_table(black_svyglm_pooled)
 black_brr_imp_df <- black_brr_imp_df %>% mutate(race = "Black", model = "weighted") # add race and weighted model
 ```
 
-## Indigenous - Does not converge
+## Indigenous - Does not converge so not evaluated in document
 ```{r, eval = FALSE}
 indigenous_brr_imp <- subset(df_brr_imp, stud_race == 3)
 
