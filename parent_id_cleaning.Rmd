@@ -233,18 +233,6 @@ hsls <- hsls %>%
 ##hsls %>% dplyr::select(pov_level, starts_with("x1pov")) %>% tbl_summary(by = pov_level)
 ```
 
-## Descriptive Statistics
-
-```{r}
-df_summ <- hsls %>% dplyr::select(p1honors, math_4level,
-                        par_exp, par_ba, par_sch_inv,
-                        first_lang, frpl, stud_race,
-                        math_score, public, x1locale)
-
-df_summ %>% gtsummary::tbl_summary(by = stud_race, type = list(all_continuous() ~ "continuous2",
-                          c(par_sch_inv) ~ "continuous2"),
-    statistic = all_continuous() ~ "{mean} ({sd})") %>% as_flex_table()
-```
 ## Save Clean Dataset
 
 ```{r save}
