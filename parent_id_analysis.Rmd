@@ -32,8 +32,8 @@ df <- haven::read_dta("gcq_hsls_subset.dta")
 # Descriptive Statistics
 
 ```{r}
-df_summ <- hsls %>% dplyr::select(p1honors, math_4level,
-                        par_exp, par_ba, par_sch_inv,
+df_summ <- df %>% labelled::drop_unused_value_labels() %>%  haven::as_factor() %>% dplyr::select(p1honors, math_4level,
+                        par_exp, female, par_ba, par_sch_inv,
                         first_lang, frpl, stud_race,
                         math_score, public, x1locale)
 
