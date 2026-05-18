@@ -41,8 +41,9 @@ df_summ %>% gtsummary::tbl_summary(by = stud_race, type = list(all_continuous() 
                           c(par_sch_inv) ~ "continuous2"),
     statistic = all_continuous() ~ "{mean} ({sd})") %>% as_flex_table()
 ```
-# UNIMPUTED - NO WEIGHTS
+# UNIMPUTED
 
+## NO WEIGHTS
 ### Write function
 ```{r}
 hsls_glm <- function(data) {
@@ -74,7 +75,7 @@ hsls_tbl_view <- function(data){
 }
 
 ```
-## Asian American
+### Asian American
 ```{r}
 asian <- filter(df, stud_race == 1)
 asian_glm <- hsls_glm(asian)
@@ -82,7 +83,7 @@ asian_glm %>% hsls_tbl_view()
 asian_tbl <- asian_glm %>% hsls_tbl_merge
 ```
 
-## Black
+### Black
 ```{r}
 # Create Black subset
 black <- filter(df, stud_race == 2)
@@ -95,7 +96,7 @@ black_tbl <- black_glm %>% hsls_tbl_merge
 black_glm %>% hsls_tbl_view()
 ```
 
-## Indigenous
+### Indigenous
 ```{r}
 indigenous <- filter(df, stud_race == 3)
 
@@ -108,7 +109,7 @@ indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
 indigenous_glm %>% hsls_tbl_view()
 ```
 
-## Latinx
+### Latinx
 ```{r}
 latinx <- filter(df, stud_race == 4)
 
@@ -121,7 +122,7 @@ latinx_tbl <- latinx_glm %>% hsls_tbl_merge
 latinx_glm %>% hsls_tbl_view()
 ```
 
-## Two or More Races
+### Two or More Races
 ```{r}
 multi <- filter(df, stud_race == 5)
 
@@ -134,7 +135,7 @@ multi_tbl <- multi_glm %>% hsls_tbl_merge
 multi_glm %>% hsls_tbl_view()
 ```
 
-## White
+### White
 ```{r}
 white <- filter(df, stud_race == 6)
 
@@ -147,7 +148,7 @@ white_tbl <- white_glm %>% hsls_tbl_merge
 white_glm %>% hsls_tbl_view()
 ```
 
-## Combined Table
+### Combined Table
 ```{r}
 tbl_merge(
   tbls = list(asian_tbl, black_tbl, indigenous_tbl, latinx_tbl, multi_tbl, white_tbl),
@@ -156,9 +157,9 @@ tbl_merge(
   as_flex_table()
 ```
 
-# UNIMPUTED WITH WEIGHTS
 
-## Weight Data
+## WEIGHTS
+### Weight Data
 ```{r}
 library(survey)
 
@@ -171,7 +172,7 @@ df_brr <- svrepdesign(
 )
 ```
 
-## Write Function
+### Write Function
 ```{r}
 hsls_glm_svy <- function(data) {
   svyglm(
@@ -185,7 +186,7 @@ hsls_glm_svy <- function(data) {
 }
 
 ```
-## Asian American
+### Asian American
 ```{r}
 asian_svy <- subset(df_brr, stud_race == 1)
 asian_svyglm <- hsls_glm_svy(asian_svy)
@@ -194,7 +195,7 @@ asian_svytbl <- asian_svyglm %>% hsls_tbl_merge
 
 ```
 
-## Black
+### Black
 ```{r}
 # Create Black subset
 black_svy <- subset(df_brr, stud_race == 2)
@@ -207,7 +208,7 @@ black_svytbl <- black_svyglm %>% hsls_tbl_merge
 black_svyglm %>% hsls_tbl_view()
 ```
 
-## Indigenous
+### Indigenous
 ```{r}
 indigenous_svy <- subset(df_brr, stud_race == 3)
 
@@ -220,7 +221,7 @@ indigenous_svytbl <- indigenous_svyglm %>% hsls_tbl_merge
 indigenous_svyglm %>% hsls_tbl_view()
 ```
 
-## Latinx
+### Latinx
 ```{r}
 latinx_svy <- subset(df_brr, stud_race == 4)
 
@@ -233,7 +234,7 @@ latinx_svytbl <- latinx_svyglm %>% hsls_tbl_merge
 latinx_svyglm %>% hsls_tbl_view()
 ```
 
-## Two or More Races
+### Two or More Races
 ```{r}
 multi_svy <- subset(df_brr, stud_race == 5)
 
@@ -246,7 +247,7 @@ multi_svytbl <- multi_svyglm %>% hsls_tbl_merge
 multi_svyglm %>% hsls_tbl_view()
 ```
 
-## White
+### White
 ```{r}
 white_svy <- subset(df_brr, stud_race == 6)
 
@@ -259,7 +260,7 @@ white_svytbl <- white_glm %>% hsls_tbl_merge
 white_glm %>% hsls_tbl_view()
 ```
 
-## Combined Table
+### Combined Table
 ```{r}
 tbl_merge(
   tbls = list(asian_svytbl, black_svytbl, indigenous_svytbl, latinx_svytbl, multi_svytbl, white_svytbl),
@@ -271,7 +272,7 @@ tbl_merge(
 
 ## UNWEIGHTED Racial/Ethnic Subgroups
 
-## Write function
+### Write function
 ```{r}
 hsls_glm_imp <- function(data) {
   with(data,     
@@ -284,7 +285,7 @@ hsls_glm_imp <- function(data) {
   ))
 }
 ```
-## Asian American
+### Asian American
 ```{r}
 asian_imp <- filter(df_imp, stud_race == 1)
 asian_glm <- hsls_glm_imp(asian_imp)
@@ -293,7 +294,7 @@ asian_tbl <- asian_glm %>% hsls_tbl_merge
 how_many_imputations(asian_glm)
 ```
 
-## Black
+### Black
 ```{r}
 # Create Black subset
 black_imp <- filter(df_imp, stud_race == 2)
@@ -307,7 +308,7 @@ black_tbl <- black_glm %>% hsls_tbl_merge
 black_glm %>% hsls_tbl_view()
 ```
 
-## Indigenous
+### Indigenous
 ```{r}
 indigenous_imp <- filter(df_imp, stud_race == 3)
 
@@ -320,7 +321,7 @@ indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
 indigenous_glm %>% hsls_tbl_view()
 ```
 
-## Latinx
+### Latinx
 ```{r}
 latinx_imp <- filter(df_imp, stud_race == 4)
 
@@ -333,7 +334,7 @@ latinx_tbl <- latinx_glm %>% hsls_tbl_merge
 latinx_glm %>% hsls_tbl_view()
 ```
 
-## Two or More Races
+### Two or More Races
 ```{r}
 multi_imp <- filter(df_imp, stud_race == 5)
 
@@ -346,7 +347,7 @@ multi_tbl <- multi_glm %>% hsls_tbl_merge
 multi_glm %>% hsls_tbl_view()
 ```
 
-## White
+### White
 ```{r}
 white_imp <- filter(df_imp, stud_race == 6)
 
@@ -359,7 +360,7 @@ white_tbl <- white_glm %>% hsls_tbl_merge
 white_glm %>% hsls_tbl_view()
 ```
 
-## Combined Table
+### Combined Table
 ```{r}
 tbl_merge(
   tbls = list(asian_tbl, black_tbl, indigenous_tbl, latinx_tbl, multi_tbl, white_tbl),
@@ -368,9 +369,10 @@ tbl_merge(
   as_flex_table()
 ```
 
-# WEIGHTED Racial/Ethnic Subgroups
 
-## BRR Weight Data
+## WEIGHTED Racial/Ethnic Subgroups
+
+### BRR Weight Data
 ```{r}
 library(survey)
 library(mitools)
@@ -390,7 +392,7 @@ df_brr_imp <- svrepdesign(
 ) 
 ```
 
-## Write function
+### Write function
 ```{r}
 
 # function to run model
@@ -417,7 +419,7 @@ make_mi_table <- function(pooled_model) {
 ```
 
 
-## Asian American
+### Asian American
 ```{r}
 asian_brr_imp <- subset(df_brr_imp, stud_race == 1)
 
@@ -434,7 +436,7 @@ asian_brr_imp_df <- make_mi_table(asian_svyglm_pooled)
 asian_brr_imp_df <- asian_brr_imp_df %>% mutate(race = "Asian American", model = "weighted") # add race and weighted model
 ```
 
-## Black
+### Black
 ```{r}
 # Create Black subset
 black_brr_imp <- subset(df_brr_imp, stud_race == 2)
@@ -452,7 +454,7 @@ black_brr_imp_df <- make_mi_table(black_svyglm_pooled)
 black_brr_imp_df <- black_brr_imp_df %>% mutate(race = "Black", model = "weighted") # add race and weighted model
 ```
 
-## Indigenous - Does not converge so not evaluated in document
+### Indigenous - Does not converge so not evaluated in document
 ```{r, eval = FALSE}
 indigenous_brr_imp <- subset(df_brr_imp, stud_race == 3)
 
@@ -469,7 +471,7 @@ indigenous_brr_imp_df <- make_mi_table(indigenous_svyglm_pooled)
 indigenous_brr_imp_df <- indigenous_brr_imp_df %>% mutate(race = "indigenous", model = "weighted") # add race and weighted model
 ```
 
-## Latinx
+### Latinx
 ```{r}
 latinx_brr_imp <- subset(df_brr_imp, stud_race == 4)
 
@@ -486,7 +488,7 @@ latinx_brr_imp_df <- make_mi_table(latinx_svyglm_pooled)
 latinx_brr_imp_df <- latinx_brr_imp_df %>% mutate(race = "Latinx", model = "weighted") # add race and weighted model
 ```
 
-## Two or More Races
+### Two or More Races
 ```{r}
 multi_brr_imp <- subset(df_brr_imp, stud_race == 5)
 
@@ -503,7 +505,7 @@ multi_brr_imp_df <- make_mi_table(multi_svyglm_pooled)
 multi_brr_imp_df <- multi_brr_imp_df %>% mutate(race = "Multiracial", model = "weighted") # add race and weighted model
 ```
 
-## White
+### White
 ```{r}
 white_brr_imp <- subset(df_brr_imp, stud_race == 6)
 
@@ -520,10 +522,10 @@ white_brr_imp_df <- make_mi_table(white_svyglm_pooled)
 white_brr_imp_df <- white_brr_imp_df %>% mutate(race = "White", model = "weighted") # add race and weighted model
 ```
 
-## Combined Table
+### Combined Table
 ```{r}
 brr_imp_table <- rbind(asian_brr_imp_df, black_brr_imp_df)
-brr_imp_table <- rbind(brr_imp_table, indigenous_brr_imp_df)
+# brr_imp_table <- rbind(brr_imp_table, indigenous_brr_imp_df) # commenting out since indigenous model did not converge
 brr_imp_table <- rbind(brr_imp_table, latinx_brr_imp_df)
 brr_imp_table <- rbind(brr_imp_table, multi_brr_imp_df)
 brr_imp_table <- rbind(brr_imp_table, white_brr_imp_df)
