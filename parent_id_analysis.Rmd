@@ -280,27 +280,9 @@ hsls_glm_imp <- function(data) {
          as.numeric(par_exp) + as.numeric(par_sch_inv) +
          female + par_ba + as.factor(first_lang) + frpl +
          math_score + public + as.factor(x1locale),
-         data = data,
          family = "quasibinomial"
   ))
 }
-
-hsls_tbl_merge <- function(data){
-  data %>% 
-    tbl_regression(exp = TRUE) %>% 
-    add_significance_stars(hide_se = FALSE, hide_p = TRUE, hide_ci = TRUE) %>% 
-    add_glance_table() 
-}
-
-
-hsls_tbl_view <- function(data){
-  data %>% 
-    tbl_regression(exp = TRUE) %>% 
-    add_significance_stars(hide_se = FALSE, hide_p = FALSE, hide_ci = FALSE) %>% 
-    add_glance_table() %>% 
-    as_flex_table()
-}
-
 ```
 ## Asian American
 ```{r}
