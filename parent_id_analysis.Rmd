@@ -380,6 +380,7 @@ imp_list <- imputationList(
   lapply(1:df_imp$m, function(i) complete(df_imp, i))
 )
 
+# creates BRR survey design
 df_brr_imp <- svrepdesign(
   weights = ~w1parent, 
   repweights = "w1parent[0-9]+",
