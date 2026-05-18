@@ -217,20 +217,25 @@ hsls <- hsls %>%
   mutate(
     exp_ba = ifelse(p1eduexpect >= 6, 1, 0),
     # par_exp: ordinal numeric (low → high expectations)
-    par_exp = ordered(
-      case_when(
-        p1eduexpect == 11            ~ 1, # IDK
-        p1eduexpect %in% c(1,2,3,4)  ~ 2, # high school to Associate
-        p1eduexpect %in% c(5,6)      ~ 3, # start/complete BA
-        p1eduexpect %in% c(7,8)      ~ 4, #start/complete MA
-        p1eduexpect %in% c(9,10)     ~ 5 # sart/complete phd/professional
-      ),
-      levels = c(1, 2, 3, 4, 5)
-    )
-  )
 
-# check poverty groups
-##hsls %>% dplyr::select(pov_level, starts_with("x1pov")) %>% tbl_summary(by = pov_level)
+par_exp = ordered(
+  dplyr::case_when(
+    p1eduexpect == 11            ~ 1, # IDK
+    p1eduexpect %in% c(1,2,3,4)  ~ 2, # high school to Associate
+    p1eduexpect %in% c(5,6)      ~ 3, # start/complete BA
+    p1eduexpect %in% c(7,8)      ~ 4, # start/complete MA
+    p1eduexpect %in% c(9,10)     ~ 5  # start/complete PhD/professional
+  ),
+  levels = c(1, 2, 3, 4, 5),
+  labels = c(
+    "Don't know",
+    "HS to Associate",
+    "BA (start/complete)",
+    "MA (start/complete)",
+    "PhD/Professional (start/complete)")
+  )
+)
+
 ```
 
 ## Save Clean Dataset
