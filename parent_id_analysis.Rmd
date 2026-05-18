@@ -505,7 +505,7 @@ black_brr_imp_df <- make_mi_table(black_svyglm_pooled)
 black_brr_imp_df <- black_brr_imp_df %>% mutate(race = "Black", model = "weighted") # add race and weighted model
 ```
 
-## Indigenous
+## Indigenousm - Does not converge
 ```{r}
 indigenous_brr_imp <- subset(df_brr_imp, stud_race == 3)
 
