@@ -311,7 +311,6 @@ hsls_glm_imp <- function(data) {
   ))
 }
 
-
 hsls_tbl_merge <- function(data){
   data %>% 
     tbl_regression(exp = TRUE) %>% 
