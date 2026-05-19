@@ -344,7 +344,7 @@ asian_glm_imp <- asian_imp %>% hsls_glm_imp()
 how_many_imputations(asian_glm_imp)
 
 # Create Tables
-asian_imp_df <- asian_glm_imp %>%  make_imp_table()
+asian_imp_df <- asian_glm_imp %>%  make_imp_table() %>% mutate(race = "Asian American", model = "unweighted") # add race and weighted model
 asian_tbl_imp <- asian_glm_imp %>% hsls_tbl_imp_merge
 asian_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -359,7 +359,7 @@ black_glm_imp <- black_imp %>% hsls_glm_imp()
 black_glm_imp %>% how_many_imputations()
 
 # Create Tables
-black_imp_df <- black_glm_imp %>%  make_imp_table()
+black_imp_df <- black_glm_imp %>%  make_imp_table()  %>% mutate(race = "Black", model = "unweighted") # add race and weighted model
 black_tbl_imp <- black_glm_imp %>% hsls_tbl_imp_merge
 black_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -373,7 +373,7 @@ indigenous_glm_imp <- indigenous_imp %>% hsls_glm_imp()
 indigenous_glm_imp %>% how_many_imputations()
 
 # Create Tables
-indigenous_imp_df <- indigenous_glm_imp %>%  make_imp_table()
+indigenous_imp_df <- indigenous_glm_imp %>%  make_imp_table()  %>% mutate(race = "indigenous", model = "unweighted") # add race and weighted model
 indigenous_tbl_imp <- indigenous_glm_imp %>% hsls_tbl_imp_merge
 indigenous_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -387,7 +387,7 @@ latinx_glm_imp <- latinx_imp %>% hsls_glm_imp()
 latinx_glm_imp %>% how_many_imputations()
 
 # Create Tables
-latinx_imp_df <- latinx_glm_imp %>%  make_imp_table()
+latinx_imp_df <- latinx_glm_imp %>%  make_imp_table()  %>% mutate(race = "latinx", model = "unweighted") # add race and weighted model
 latinx_tbl_imp <- latinx_glm_imp %>% hsls_tbl_imp_merge
 latinx_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -401,7 +401,7 @@ multi_glm_imp <- multi_imp %>% hsls_glm_imp()
 multi_glm_imp %>% how_many_imputations()
 
 # Create Tables
-multi_imp_df <- multi_glm_imp %>%  make_imp_table()
+multi_imp_df <- multi_glm_imp %>%  make_imp_table()  %>% mutate(race = "Multiracial", model = "unweighted") # add race and weighted model
 multi_tbl_imp <- multi_glm_imp %>% hsls_tbl_imp_merge
 multi_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -415,7 +415,7 @@ white_glm_imp <- white_imp %>% hsls_glm_imp()
 white_glm_imp %>% how_many_imputations()
 
 # Create Tables
-white_imp_df <- white_glm_imp %>%  make_imp_table()
+white_imp_df <- white_glm_imp %>%  make_imp_table() %>% mutate(race = "White", model = "unweighted") # add race and weighted model
 white_tbl_imp <- white_glm_imp %>% hsls_tbl_imp_merge
 white_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -587,4 +587,7 @@ brr_imp_table <- rbind(brr_imp_table, multi_brr_imp_df)
 brr_imp_table <- rbind(brr_imp_table, white_brr_imp_df)
 write_csv(brr_imp_table, "weighted_imputed_table_results.csv")
 
+# combine weighted and unweighted tables
+all_imp_table <- rbind(brr_imp_table, imp_table)
+write_csv(all_imp_table, "all_imputed_table_results.csv")
 ```
