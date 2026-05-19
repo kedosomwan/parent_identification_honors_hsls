@@ -53,7 +53,7 @@ hsls_glm <- function(data) {
       female + par_ba + as.factor(first_lang) + frpl +
       math_score + public + as.factor(x1locale),
     data = data,
-    family = "quasibinomial"
+    family = "binomial"
   )
 }
 
@@ -301,7 +301,7 @@ hsls_glm_imp <- function(data) {
          as.numeric(par_exp) + as.numeric(par_sch_inv) +
          female + par_ba + as.factor(first_lang) + frpl +
          math_score + public + as.factor(x1locale),
-         family = "quasibinomial"
+         family = "binomial"
   ))
 }
 
