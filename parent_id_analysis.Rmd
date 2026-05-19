@@ -219,7 +219,6 @@ black_svy <- subset(df_brr, stud_race == 2)
 black_svyglm <- black_svy %>% hsls_glm_svy()
 black_svyglm %>% poliscidata::fit.svyglm()
 
-
 # Create Tables
 black_svytbl <- black_svyglm %>% hsls_tbl_merge
 black_svyglm %>% hsls_tbl_view()
@@ -286,6 +285,8 @@ tbl_merge(
   tab_spanner = c("Asian American", "Black", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
+
+
 ```
 
 # IMPUTED 
@@ -320,14 +321,32 @@ hsls_tbl_imp_view <- function(data){
     add_glance_table() %>% 
     as_flex_table()
 }
+
+make_imp_table <- function(model) {
+  as.data.frame(summary(pool(model))) %>% # make data frame or pooled model summary
+    tibble::rownames_to_column("variable") %>% # make variable column
+    dplyr::mutate(
+      or = exp(estimate), # exponentiate values for ORs
+      ll = exp(estimate - (qnorm(0.975) * std.error)), # exponentiate lower limit with Wald interval
+      ul = exp(estimate + (qnorm(0.975) * std.error)), # exponentiate upper limit with Wald interval
+      se = std.error) %>% 
+    dplyr::select(or, se, ll, ul, p.value)  
+}
+
 ```
 ### Asian American
 ```{r}
+# create subset
 asian_imp <- filter(df_imp, stud_race == 1)
-asian_glm_imp <- hsls_glm_imp(asian_imp)
-asian_glm_imp %>% hsls_tbl_imp_view()
-asian_tbl_imp <- asian_glm_imp %>% hsls_tbl_imp_merge
+
+# Run Imputated model & check how many needed
+asian_glm_imp <- asian_imp %>% hsls_glm_imp()
 how_many_imputations(asian_glm_imp)
+
+# Create Tables
+asian_imp_df <- asian_glm_imp %>%  make_imp_table()
+asian_tbl_imp <- asian_glm_imp %>% hsls_tbl_imp_merge
+asian_glm_imp %>% hsls_tbl_imp_view()
 ```
 
 ### Black
@@ -340,6 +359,7 @@ black_glm_imp <- black_imp %>% hsls_glm_imp()
 black_glm_imp %>% how_many_imputations()
 
 # Create Tables
+black_imp_df <- black_glm_imp %>%  make_imp_table()
 black_tbl_imp <- black_glm_imp %>% hsls_tbl_imp_merge
 black_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -353,6 +373,7 @@ indigenous_glm_imp <- indigenous_imp %>% hsls_glm_imp()
 indigenous_glm_imp %>% how_many_imputations()
 
 # Create Tables
+indigenous_imp_df <- indigenous_glm_imp %>%  make_imp_table()
 indigenous_tbl_imp <- indigenous_glm_imp %>% hsls_tbl_imp_merge
 indigenous_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -366,6 +387,7 @@ latinx_glm_imp <- latinx_imp %>% hsls_glm_imp()
 latinx_glm_imp %>% how_many_imputations()
 
 # Create Tables
+latinx_imp_df <- latinx_glm_imp %>%  make_imp_table()
 latinx_tbl_imp <- latinx_glm_imp %>% hsls_tbl_imp_merge
 latinx_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -379,6 +401,7 @@ multi_glm_imp <- multi_imp %>% hsls_glm_imp()
 multi_glm_imp %>% how_many_imputations()
 
 # Create Tables
+multi_imp_df <- multi_glm_imp %>%  make_imp_table()
 multi_tbl_imp <- multi_glm_imp %>% hsls_tbl_imp_merge
 multi_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -392,6 +415,7 @@ white_glm_imp <- white_imp %>% hsls_glm_imp()
 white_glm_imp %>% how_many_imputations()
 
 # Create Tables
+white_imp_df <- white_glm_imp %>%  make_imp_table()
 white_tbl_imp <- white_glm_imp %>% hsls_tbl_imp_merge
 white_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -403,6 +427,14 @@ tbl_merge(
   tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
+
+#csv
+imp_table <- rbind(asian_imp_df, black_imp_df)
+imp_table <- rbind(imp_table, indigenous_imp_df) # commenting out since indigenous model did not converge
+imp_table <- rbind(imp_table,latinx_imp_df)
+imp_table <- rbind(imp_table, multi_imp_df)
+imp_table <- rbind(imp_table, white_imp_df)
+write_csv(imp_table, "unweighted_imputed_table_results.csv")
 ```
 
 
@@ -442,13 +474,18 @@ hsls_glm_svy_imp <- function(data) {
   ))
 }
 
-# function to exponentiate results into dataframe
-make_mi_table <- function(pooled_model) {
-  as.data.frame(summary(pooled_model)) %>% 
+# function to exponentiate results and create dataframe with or, se, ll, ul, & p-value
+make_mi_table <- function(model) {
+  as.data.frame(summary(MIcombine(model))) %>%  # make dataframe of pooled model
   tibble::rownames_to_column("variable") %>% # make variable column
   mutate(
-    or = exp(results), ll = exp(`(lower`), ul = exp(`upper)`), # exponentiate values
-    z = results / se, p_value = 2 * (1 - pnorm(abs(z)))) # calculate p-value with Wald Test
+    or = exp(results), # exponentiate estimate for ORs
+    ll = exp(`(lower`), # exponentiate ll
+    ul = exp(`upper)`), # exponentiate ul
+    z = results / se, 
+    p.value = 2 * (1 - pnorm(abs(z))) %>%  # calculate p-value with Wald Test
+  dplyr::select(or, se, ll, ul, p.value)
+  )
 }
 
 ```
@@ -456,16 +493,15 @@ make_mi_table <- function(pooled_model) {
 
 ### Asian American
 ```{r}
+# subset data
 asian_brr_imp <- subset(df_brr_imp, stud_race == 1)
 
+# run weighted imputed data
 asian_svyglm_imp <- hsls_glm_svy_imp(asian_brr_imp)
 
-asian_svyglm_pooled <- MIcombine(asian_svyglm_imp)
-
-summary(asian_svyglm_pooled)
-
 # extract summary data into table
-asian_brr_imp_df <- make_mi_table(asian_svyglm_pooled)
+asian_brr_imp_df <- make_mi_table(asian_svyglm_imp)
+asian_brr_imp_df
 
 # add race and model
 asian_brr_imp_df <- asian_brr_imp_df %>% mutate(race = "Asian American", model = "weighted") # add race and weighted model
@@ -476,14 +512,12 @@ asian_brr_imp_df <- asian_brr_imp_df %>% mutate(race = "Asian American", model =
 # Create Black subset
 black_brr_imp <- subset(df_brr_imp, stud_race == 2)
 
+# run weighted imputed model
 black_svyglm_imp <- hsls_glm_svy_imp(black_brr_imp)
 
-black_svyglm_pooled <- MIcombine(black_svyglm_imp)
-
-summary(black_svyglm_pooled)
-
 # extract summary data into table
-black_brr_imp_df <- make_mi_table(black_svyglm_pooled)
+black_brr_imp_df <- make_mi_table(black_svyglm_imp)
+black_brr_imp_df
 
 # add race and model
 black_brr_imp_df <- black_brr_imp_df %>% mutate(race = "Black", model = "weighted") # add race and weighted model
@@ -495,12 +529,8 @@ indigenous_brr_imp <- subset(df_brr_imp, stud_race == 3)
 
 indigenous_svyglm_imp <- hsls_glm_svy_imp(indigenous_brr_imp)
 
-indigenous_svyglm_pooled <- MIcombine(indigenous_svyglm_imp)
-
-summary(indigenous_svyglm_pooled)
-
 # extract summary data into table
-indigenous_brr_imp_df <- make_mi_table(indigenous_svyglm_pooled)
+indigenous_brr_imp_df <- make_mi_table(indigenous_svyglm_imp)
 
 # add race and model
 indigenous_brr_imp_df <- indigenous_brr_imp_df %>% mutate(race = "indigenous", model = "weighted") # add race and weighted model
@@ -512,12 +542,9 @@ latinx_brr_imp <- subset(df_brr_imp, stud_race == 4)
 
 latinx_svyglm_imp <- hsls_glm_svy_imp(latinx_brr_imp)
 
-latinx_svyglm_pooled <- MIcombine(latinx_svyglm_imp)
-
-summary(latinx_svyglm_pooled)
-
 # extract summary data into table
-latinx_brr_imp_df <- make_mi_table(latinx_svyglm_pooled)
+latinx_brr_imp_df <- make_mi_table(latinx_svyglm_imp)
+latinx_brr_imp_df
 
 # add race and model
 latinx_brr_imp_df <- latinx_brr_imp_df %>% mutate(race = "Latinx", model = "weighted") # add race and weighted model
@@ -529,12 +556,9 @@ multi_brr_imp <- subset(df_brr_imp, stud_race == 5)
 
 multi_svyglm_imp <- hsls_glm_svy_imp(multi_brr_imp)
 
-multi_svyglm_pooled <- MIcombine(multi_svyglm_imp)
-
-summary(multi_svyglm_pooled)
-
 # extract summary data into table
-multi_brr_imp_df <- make_mi_table(multi_svyglm_pooled)
+multi_brr_imp_df <- make_mi_table(multi_svyglm_imp)
+multi_brr_imp_df
 
 # add race and model
 multi_brr_imp_df <- multi_brr_imp_df %>% mutate(race = "Multiracial", model = "weighted") # add race and weighted model
@@ -546,12 +570,9 @@ white_brr_imp <- subset(df_brr_imp, stud_race == 6)
 
 white_svyglm_imp <- hsls_glm_svy_imp(white_brr_imp)
 
-white_svyglm_pooled <- MIcombine(white_svyglm_imp)
-
-summary(white_svyglm_pooled)
-
 # extract summary data into table
-white_brr_imp_df <- make_mi_table(white_svyglm_pooled)
+white_brr_imp_df <- make_mi_table(white_svyglm_imp)
+white_brr_imp_df
 
 # add race and model
 white_brr_imp_df <- white_brr_imp_df %>% mutate(race = "White", model = "weighted") # add race and weighted model
