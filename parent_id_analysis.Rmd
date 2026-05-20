@@ -330,7 +330,7 @@ make_imp_table <- function(model) {
       ll = exp(estimate - (qnorm(0.975) * std.error)), # exponentiate lower limit with Wald interval
       ul = exp(estimate + (qnorm(0.975) * std.error)), # exponentiate upper limit with Wald interval
       se = std.error) %>% 
-    dplyr::select(or, se, ll, ul, p.value)  
+    dplyr::select(variable, or, se, ll, ul, p.value)  
 }
 
 ```
@@ -503,7 +503,7 @@ asian_brr_imp_df
 
 # add race and model
 asian_brr_imp_df <- asian_brr_imp_df %>% 
-  dplyr::select(or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
   mutate(race = "Asian American", model = "weighted") # add race and weighted model
 ```
 
@@ -521,7 +521,7 @@ black_brr_imp_df
 
 # add race and model
 black_brr_imp_df <- black_brr_imp_df %>% 
-  dplyr::select(or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
   mutate(race = "Black", model = "weighted") # add race and weighted model
 ```
 
@@ -536,7 +536,7 @@ indigenous_brr_imp_df <- make_mi_table(indigenous_svyglm_imp)
 
 # add race and model
 indigenous_brr_imp_df <- indigenous_brr_imp_df %>% 
-  dplyr::select(or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
   mutate(race = "indigenous", model = "weighted") # add race and weighted model
 ```
 
@@ -552,7 +552,7 @@ latinx_brr_imp_df
 
 # add race and model
 latinx_brr_imp_df <- latinx_brr_imp_df %>% 
-  dplyr::select(or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
   mutate(race = "Latinx", model = "weighted") # add race and weighted model
 ```
 
@@ -568,7 +568,7 @@ multi_brr_imp_df
 
 # add race and model
 multi_brr_imp_df <- multi_brr_imp_df %>% 
-  dplyr::select(or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
   mutate(race = "Multiracial", model = "weighted") # add race and weighted model
 ```
 
@@ -584,7 +584,7 @@ white_brr_imp_df
 
 # add race and model
 white_brr_imp_df <- white_brr_imp_df %>% 
-  dplyr::select(or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
   mutate(race = "White", model = "weighted") # add race and weighted model
 ```
 
