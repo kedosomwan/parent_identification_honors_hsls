@@ -1,5 +1,5 @@
 ---
-title: "E-value calculation"
+title: "E-value calculation & Forest Plots"
 output: word_document
 date: "`r Sys.Date()`"
 ---
@@ -8,37 +8,19 @@ date: "`r Sys.Date()`"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Odds Ratios > 0.15
+# Evalue Calculations 
 
 ```{r}
 library(tidyverse)
-df <- readxl::read_xlsx("or_ci.xlsx")
-df_evalue <- df %>% mutate(rr = sqrt(or),
+df_or <- read_csv("all_imputed_table_results.csv")
+
+# add e-value columns based on calculation for when Odds Ratios > 0.15
+df_evalue <- df_or %>% dplyr::filter(p.value < 0.05) %>% 
+  mutate(rr = sqrt(or),
   evalue = ifelse(rr>1, rr + sqrt(rr*(rr-1)), 1/rr + sqrt(1/rr*(1/rr-1))),
                            evalue_ll = ll + sqrt(ll*(ll-1)),
                            evalue_ul = 1/ul + sqrt(1/ul + sqrt(1/ul*(1/ul -1)))
 )
 ```
 
-## Odds Ratios < 0.15
-```{r}
-df_evalue <- df %>% mutate(rr = or,
-  evalue = ifelse(rr>1, rr + sqrt(rr*(rr-1)), 1/rr + sqrt(1/rr*(1/rr-1))),
-                           evalue_ll = ll + sqrt(ll*(ll-1)),
-                           evalue_ul = ul + sqrt(1/ul + sqrt(1/ul*(1/ul -1)))
-)
-
-```
-
-## Risk Ratios
-
-
-```{r}
-df_evalue <- df %>% mutate(evalue = ifelse(rr>1, rr + sqrt(rr*(rr-1)), 1/rr + sqrt(1/rr*(1/rr-1))),
-                           evalue_ll = ll + sqrt(ll*(ll-1)),
-                           evalue_ul = ul + sqrt(1/ul + sqrt(1/ul*(1/ul -1)))
-)
-
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Forest Plots
