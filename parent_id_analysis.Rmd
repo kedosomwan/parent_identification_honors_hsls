@@ -332,7 +332,6 @@ make_imp_table <- function(model) {
       variable = term) %>% 
     dplyr::select(variable, or, se, ll, ul, p.value)  
 }
-
 ```
 ### Asian American
 ```{r}
