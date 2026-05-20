@@ -324,12 +324,12 @@ hsls_tbl_imp_view <- function(data){
 
 make_imp_table <- function(model) {
   as.data.frame(summary(pool(model))) %>% # make data frame or pooled model summary
-    tibble::rownames_to_column("variable") %>% # make variable column
     dplyr::mutate(
       or = exp(estimate), # exponentiate values for ORs
       ll = exp(estimate - (qnorm(0.975) * std.error)), # exponentiate lower limit with Wald interval
       ul = exp(estimate + (qnorm(0.975) * std.error)), # exponentiate upper limit with Wald interval
-      se = std.error) %>% 
+      se = std.error,
+      variable = term) %>% 
     dplyr::select(variable, or, se, ll, ul, p.value)  
 }
 
@@ -344,7 +344,10 @@ asian_glm_imp <- asian_imp %>% hsls_glm_imp()
 how_many_imputations(asian_glm_imp)
 
 # Create Tables
-asian_imp_df <- asian_glm_imp %>%  make_imp_table() %>% mutate(race = "Asian American", model = "unweighted") # add race and weighted model
+asian_imp_df <- asian_glm_imp %>%  
+  make_imp_table() %>% 
+  mutate(race = "Asian American", model = "unweighted") # add race and weighted model
+
 asian_tbl_imp <- asian_glm_imp %>% hsls_tbl_imp_merge
 asian_glm_imp %>% hsls_tbl_imp_view()
 ```
