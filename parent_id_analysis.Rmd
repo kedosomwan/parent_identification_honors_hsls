@@ -1,6 +1,5 @@
 ---
-title: "analysis"
-author: "Kristian Edosomwan"
+title: "Data Analysis"
 date: "`r Sys.Date()`"
 output:
   word_document:
@@ -426,14 +425,13 @@ white_glm_imp %>% hsls_tbl_imp_view()
 ### Combined Table
 ```{r}
 tbl_merge(
-  tbls = list(asian_tbl_imp, black_tbl_imp, indigenous_tbl_imp, latinx_tbl_imp, multi_tbl_imp, white_tbl_imp),
+  tbls = list(asian_tbl_imp, black_tbl_imp, latinx_tbl_imp, multi_tbl_imp, white_tbl_imp),
   tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
 
 #csv
 imp_table <- rbind(asian_imp_df, black_imp_df)
-imp_table <- rbind(imp_table, indigenous_imp_df) # commenting out since indigenous model did not converge
 imp_table <- rbind(imp_table,latinx_imp_df)
 imp_table <- rbind(imp_table, multi_imp_df)
 imp_table <- rbind(imp_table, white_imp_df)

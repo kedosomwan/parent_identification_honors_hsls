@@ -1,6 +1,5 @@
 ---
-title: "imputation"
-author: "Kristian Edosomwan"
+title: "Data Imputation"
 date: "`r Sys.Date()`"
 output:
   word_document:

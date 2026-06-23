@@ -1,5 +1,5 @@
 ---
-title: "E-value calculation & Forest Plots"
+title: "E-value Calculation & Tables"
 output: word_document
 date: "`r Sys.Date()`"
 ---

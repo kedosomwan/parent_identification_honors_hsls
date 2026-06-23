@@ -1,6 +1,5 @@
 ---
-title: "Prepare HSLS GCQ Data for Analysis"
-author: "Kristian Edosomwan"
+title: "Data Tidying"
 date: "`r Sys.Date()`"
 output:
   word_document:
