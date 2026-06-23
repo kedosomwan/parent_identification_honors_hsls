@@ -22,6 +22,7 @@ library(gtsummary)
 library(survey)
 library(jtools)
 library(mitools)
+library(flextable)
 ```
 
 ## Load datasets
@@ -598,6 +599,37 @@ brr_imp_table <- rbind(brr_imp_table, latinx_brr_imp_df)
 brr_imp_table <- rbind(brr_imp_table, multi_brr_imp_df)
 brr_imp_table <- rbind(brr_imp_table, white_brr_imp_df)
 write_csv(brr_imp_table, "weighted_imputed_table_results.csv")
+
+brr_imp_table_wide <- brr_imp_table %>% 
+  mutate(
+    SE = round(se, 2),
+    stars = case_when(
+      p.value < 0.001 ~ "***",
+      p.value < 0.01  ~ "**",
+      p.value < 0.05  ~ "*",
+      p.value < 0.1   ~ ".",
+      TRUE ~ ""),
+    or_round = round(or, 2),
+    OR = paste0(formatC(or_round, format = "f", digits = 2), stars)
+    ) %>% 
+  dplyr::select(race, variable, OR, SE) %>% 
+  pivot_wider(
+    names_from = race,
+    values_from = c(OR, SE)
+  )
+
+brr_imp_table_wide <- brr_imp_table_wide %>% 
+  dplyr::select(variable, 
+                `OR_Asian American`, `SE_Asian American`,
+                OR_Black, SE_Black,
+                OR_Latinx, SE_Latinx,
+                OR_Multiracial, SE_Multiracial,
+                OR_White, SE_White)
+
+
+flextable(brr_imp_table_wide)
+df %>% count(first_lang)
+df %>% count(x1locale)
 
 # combine weighted and unweighted tables
 all_imp_table <- rbind(brr_imp_table, imp_table)
