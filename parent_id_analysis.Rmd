@@ -77,9 +77,16 @@ hsls_tbl_view <- function(data){
 ```
 ### Asian American
 ```{r}
+# Create Asian Subset
 asian <- filter(df, stud_race == 1)
+
+# Run Model
 asian_glm <- hsls_glm(asian)
-asian_glm %>% hsls_tbl_view()
+
+# Get fit Statistics
+summ(asian_glm)
+
+# Create table
 asian_tbl <- asian_glm %>% hsls_tbl_merge
 ```
 
@@ -88,64 +95,65 @@ asian_tbl <- asian_glm %>% hsls_tbl_merge
 # Create Black subset
 black <- filter(df, stud_race == 2)
 
-# Run Imputation & check how many needed
+# Run Model
 black_glm <- black %>% hsls_glm()
 
-# Create Tables
+# Get fit Statistics
+summ(black_glm)
+
+# Create Table
 black_tbl <- black_glm %>% hsls_tbl_merge
-black_glm %>% hsls_tbl_view()
-```
 
-### Indigenous
-```{r}
-indigenous <- filter(df, stud_race == 3)
-
-# Run Imputation & check how many needed
-indigenous_glm <- indigenous %>% hsls_glm()
-
-
-# Create Tables
-indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
-indigenous_glm %>% hsls_tbl_view()
 ```
 
 ### Latinx
 ```{r}
+
+# Subset
 latinx <- filter(df, stud_race == 4)
 
-# Run Imputation & check how many needed
+# Run 
 latinx_glm <- latinx %>% hsls_glm()
 
+# Get Fit statistics
+latinx_glm %>% summ()
 
-# Create Tables
+# Create Table
 latinx_tbl <- latinx_glm %>% hsls_tbl_merge
-latinx_glm %>% hsls_tbl_view()
+
 ```
 
 ### Two or More Races
 ```{r}
+
+# Subset
 multi <- filter(df, stud_race == 5)
 
-# Run Imputation & check how many needed
+# Run
 multi_glm <- multi %>% hsls_glm()
 
+# Get fit statistics
+multi_glm %>% summ()
 
-# Create Tables
+# Create Table
 multi_tbl <- multi_glm %>% hsls_tbl_merge
-multi_glm %>% hsls_tbl_view()
+
 ```
 
 ### White
 ```{r}
+# Subset
 white <- filter(df, stud_race == 6)
 
-# Run Imputation & check how many needed
+# Run 
 white_glm <- white %>% hsls_glm()
 
+# Get fit Statistics
+white_glm %>% summ()
 
-# Create Tables
+# Create Table
 white_tbl <- white_glm %>% hsls_tbl_merge
-white_glm %>% hsls_tbl_view()
+
 ```
 
 
