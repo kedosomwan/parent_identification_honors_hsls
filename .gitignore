@@ -6,3 +6,5 @@
 *.rdata
 .positai
 .DS_Store
+tables/
+data/
