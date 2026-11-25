@@ -26,8 +26,8 @@ library(flextable)
 
 ## Load datasets
 ```{r}
-load("df_imputed.rdata")
-df <- haven::read_dta("gcq_hsls_subset.dta")
+load("data/df_imputed.rdata")
+df <- haven::read_dta("data/gcq_hsls_subset.dta")
 ```
 # Descriptive Statistics
 
@@ -77,16 +77,9 @@ hsls_tbl_view <- function(data){
 ```
 ### Asian American
 ```{r}
-# Create Asian Subset
 asian <- filter(df, stud_race == 1)
-
-# Run Model
 asian_glm <- hsls_glm(asian)
-
-# Get fit Statistics
-summ(asian_glm)
-
-# Create table
+asian_glm %>% hsls_tbl_view()
 asian_tbl <- asian_glm %>% hsls_tbl_merge
 ```
 
@@ -95,65 +88,64 @@ asian_tbl <- asian_glm %>% hsls_tbl_merge
 # Create Black subset
 black <- filter(df, stud_race == 2)
 
-# Run Model
+# Run Imputation & check how many needed
 black_glm <- black %>% hsls_glm()
 
-# Get fit Statistics
-summ(black_glm)
-
-# Create Table
+# Create Tables
 black_tbl <- black_glm %>% hsls_tbl_merge
+black_glm %>% hsls_tbl_view()
+```
 
+### Indigenous
+```{r}
+indigenous <- filter(df, stud_race == 3)
+
+# Run Imputation & check how many needed
+indigenous_glm <- indigenous %>% hsls_glm()
+
+
+# Create Tables
+indigenous_tbl <- indigenous_glm %>% hsls_tbl_merge
+indigenous_glm %>% hsls_tbl_view()
 ```
 
 ### Latinx
 ```{r}
-
-# Subset
 latinx <- filter(df, stud_race == 4)
 
-# Run 
+# Run Imputation & check how many needed
 latinx_glm <- latinx %>% hsls_glm()
 
-# Get Fit statistics
-latinx_glm %>% summ()
 
-# Create Table
+# Create Tables
 latinx_tbl <- latinx_glm %>% hsls_tbl_merge
-
+latinx_glm %>% hsls_tbl_view()
 ```
 
 ### Two or More Races
 ```{r}
-
-# Subset
 multi <- filter(df, stud_race == 5)
 
-# Run
+# Run Imputation & check how many needed
 multi_glm <- multi %>% hsls_glm()
 
-# Get fit statistics
-multi_glm %>% summ()
 
-# Create Table
+# Create Tables
 multi_tbl <- multi_glm %>% hsls_tbl_merge
-
+multi_glm %>% hsls_tbl_view()
 ```
 
 ### White
 ```{r}
-# Subset
 white <- filter(df, stud_race == 6)
 
-# Run 
+# Run Imputation & check how many needed
 white_glm <- white %>% hsls_glm()
 
-# Get fit Statistics
-white_glm %>% summ()
 
-# Create Table
+# Create Tables
 white_tbl <- white_glm %>% hsls_tbl_merge
-
+white_glm %>% hsls_tbl_view()
 ```
 
 
@@ -173,6 +165,17 @@ export_summs(
   statistics = "all"
   )
 ```
+### Goodness of fit
+```{r}
+library(ResourceSelection)
+hoslem.test(white_glm$y,  fitted(white_glm))
+hoslem.test(black_glm$y,  fitted(black_glm))
+hoslem.test(latinx_glm$y,fitted(latinx_glm))
+hoslem.test(asian_glm$y,  fitted(asian_glm))
+hoslem.test(white_glm$y,  fitted(white_glm))
+hoslem.test(multi_glm$y,  fitted(multi_glm))
+```
+
 
 
 ## WEIGHTS
@@ -331,14 +334,14 @@ hsls_tbl_imp_view <- function(data){
 }
 
 make_imp_table <- function(model) {
-  as.data.frame(summary(pool(model))) %>% # make data frame or pooled model summary
+  tidy(pool(model)) %>% # make data frame or pooled model summary
     dplyr::mutate(
       or = exp(estimate), # exponentiate values for ORs
       ll = exp(estimate - (qnorm(0.975) * std.error)), # exponentiate lower limit with Wald interval
       ul = exp(estimate + (qnorm(0.975) * std.error)), # exponentiate upper limit with Wald interval
       se = std.error,
       variable = term) %>% 
-    dplyr::select(variable, or, se, ll, ul, p.value)  
+    dplyr::select(variable, or, se, ll, ul, p.value, fmi)  
 }
 ```
 ### Asian American
@@ -349,7 +352,6 @@ asian_imp <- filter(df_imp, stud_race == 1)
 # Run Imputated model & check how many needed
 asian_glm_imp <- asian_imp %>% hsls_glm_imp()
 how_many_imputations(asian_glm_imp)
-
 # Create Tables
 asian_imp_df <- asian_glm_imp %>%  
   make_imp_table() %>% 
@@ -397,7 +399,7 @@ latinx_glm_imp <- latinx_imp %>% hsls_glm_imp()
 latinx_glm_imp %>% how_many_imputations()
 
 # Create Tables
-latinx_imp_df <- latinx_glm_imp %>%  make_imp_table()  %>% mutate(race = "latinx", model = "unweighted") # add race and weighted model
+latinx_imp_df <- latinx_glm_imp %>%  make_imp_table()  %>% mutate(race = "Latinx", model = "unweighted") # add race and weighted model
 latinx_tbl_imp <- latinx_glm_imp %>% hsls_tbl_imp_merge
 latinx_glm_imp %>% hsls_tbl_imp_view()
 ```
@@ -434,16 +436,48 @@ white_glm_imp %>% hsls_tbl_imp_view()
 ```{r}
 tbl_merge(
   tbls = list(asian_tbl_imp, black_tbl_imp, latinx_tbl_imp, multi_tbl_imp, white_tbl_imp),
-  tab_spanner = c("Asian American", "Black", "Indigenous", "Latinx", "Two or More Races", "White")
+  tab_spanner = c("Asian American", "Black", "Latinx", "Two or More Races", "White")
   ) %>% 
   as_flex_table()
 
-#csv
+
 imp_table <- rbind(asian_imp_df, black_imp_df)
 imp_table <- rbind(imp_table,latinx_imp_df)
 imp_table <- rbind(imp_table, multi_imp_df)
 imp_table <- rbind(imp_table, white_imp_df)
-write_csv(imp_table, "unweighted_imputed_table_results.csv")
+
+# flextable
+imp_table_wide <- imp_table %>% 
+  mutate(
+    SE = round(se, 2),
+    fmi = fmi*100, 
+    fmi = paste0(formatC(fmi, format = "f", digits = 0), "%"),
+    stars = case_when(
+      p.value < 0.001 ~ "***",
+      p.value < 0.01  ~ "**",
+      p.value < 0.05  ~ "*",
+      TRUE ~ ""),
+    or_round = round(or, 2),
+    OR = paste0(formatC(or_round, format = "f", digits = 2), stars)
+    ) %>% 
+  dplyr::select(race, variable, OR, SE, fmi) %>% 
+  pivot_wider(
+    names_from = race,
+    values_from = c(OR, SE, fmi)
+  )
+
+imp_table_wide <- imp_table_wide %>% 
+  dplyr::select(variable, 
+                `OR_Asian American`, `SE_Asian American`, `fmi_Asian American`,
+                OR_Black, SE_Black, fmi_Black,
+                OR_Latinx, SE_Latinx, fmi_Latinx,
+                OR_Multiracial, SE_Multiracial, fmi_Multiracial,
+                OR_White, SE_White, fmi_White)
+(unweighted_table <- flextable(imp_table_wide))
+save_as_docx(unweighted_table, path = "unweighted_table.docx")
+
+#csv
+write_csv(imp_table, "tables/unweighted_imputed_table_results.csv")
 ```
 
 
@@ -492,6 +526,7 @@ make_mi_table <- function(model) {
     ll = exp(`(lower`), # exponentiate ll
     ul = exp(`upper)`), # exponentiate ul
     z = results / se, 
+    fmi = missInfo,
     p.value = 2 * (1 - pnorm(abs(z)))) # calculate p-value with Wald Test
 }
 
@@ -512,7 +547,7 @@ asian_brr_imp_df
 
 # add race and model
 asian_brr_imp_df <- asian_brr_imp_df %>% 
-  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value, fmi) %>% # select relevant estimates
   mutate(race = "Asian American", model = "weighted") # add race and weighted model
 ```
 
@@ -530,23 +565,8 @@ black_brr_imp_df
 
 # add race and model
 black_brr_imp_df <- black_brr_imp_df %>% 
-  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value, fmi) %>% # select relevant estimates
   mutate(race = "Black", model = "weighted") # add race and weighted model
-```
-
-### Indigenous - Does not converge so not evaluated in document
-```{r, eval = FALSE}
-indigenous_brr_imp <- subset(df_brr_imp, stud_race == 3)
-
-indigenous_svyglm_imp <- hsls_glm_svy_imp(indigenous_brr_imp)
-
-# extract summary data into table
-indigenous_brr_imp_df <- make_mi_table(indigenous_svyglm_imp)
-
-# add race and model
-indigenous_brr_imp_df <- indigenous_brr_imp_df %>% 
-  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
-  mutate(race = "indigenous", model = "weighted") # add race and weighted model
 ```
 
 ### Latinx
@@ -561,7 +581,7 @@ latinx_brr_imp_df
 
 # add race and model
 latinx_brr_imp_df <- latinx_brr_imp_df %>% 
-  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value, fmi) %>% # select relevant estimates
   mutate(race = "Latinx", model = "weighted") # add race and weighted model
 ```
 
@@ -577,7 +597,7 @@ multi_brr_imp_df
 
 # add race and model
 multi_brr_imp_df <- multi_brr_imp_df %>% 
-  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value, fmi) %>% # select relevant estimates
   mutate(race = "Multiracial", model = "weighted") # add race and weighted model
 ```
 
@@ -593,7 +613,7 @@ white_brr_imp_df
 
 # add race and model
 white_brr_imp_df <- white_brr_imp_df %>% 
-  dplyr::select(variable, or, se, ll, ul, p.value) %>% # select relevant estimates
+  dplyr::select(variable, or, se, ll, ul, p.value, fmi) %>% # select relevant estimates
   mutate(race = "White", model = "weighted") # add race and weighted model
 ```
 
@@ -608,36 +628,38 @@ write_csv(brr_imp_table, "weighted_imputed_table_results.csv")
 
 brr_imp_table_wide <- brr_imp_table %>% 
   mutate(
+    fmi = str_replace(fmi, "\\s+%", "%"),
     SE = round(se, 2),
     stars = case_when(
       p.value < 0.001 ~ "***",
       p.value < 0.01  ~ "**",
       p.value < 0.05  ~ "*",
-      p.value < 0.1   ~ ".",
       TRUE ~ ""),
     or_round = round(or, 2),
     OR = paste0(formatC(or_round, format = "f", digits = 2), stars)
     ) %>% 
-  dplyr::select(race, variable, OR, SE) %>% 
+  dplyr::select(race, variable, OR, SE, fmi) %>% 
   pivot_wider(
     names_from = race,
-    values_from = c(OR, SE)
+    values_from = c(OR, SE, fmi)
   )
 
 brr_imp_table_wide <- brr_imp_table_wide %>% 
   dplyr::select(variable, 
-                `OR_Asian American`, `SE_Asian American`,
-                OR_Black, SE_Black,
-                OR_Latinx, SE_Latinx,
-                OR_Multiracial, SE_Multiracial,
-                OR_White, SE_White)
+                `OR_Asian American`, `SE_Asian American`, `fmi_Asian American`,
+                OR_Black, SE_Black, fmi_Black,
+                OR_Latinx, SE_Latinx, fmi_Latinx,
+                OR_Multiracial, SE_Multiracial, fmi_Multiracial,
+                OR_White, SE_White, fmi_White)
 
 
-flextable(brr_imp_table_wide)
+(weighted_table <- flextable(brr_imp_table_wide))
+save_as_docx(weighted_table, path = "weighted_table.docx")
 df %>% count(first_lang)
 df %>% count(x1locale)
 
 # combine weighted and unweighted tables
 all_imp_table <- rbind(brr_imp_table, imp_table)
-write_csv(all_imp_table, "all_imputed_table_results.csv")
+write_csv(all_imp_table, "tables/all_imputed_table_results.csv")
 ```
+
