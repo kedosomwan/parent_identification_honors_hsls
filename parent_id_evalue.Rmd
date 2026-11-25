@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(flextable)
-df_or <- read_csv("all_imputed_table_results.csv")
+df_or <- read_csv("data/all_imputed_table_results.csv")
 
 # add e-value columns based on calculation for when Odds Ratios > 0.15
 df_evalue <- df_or %>% dplyr::filter(p.value < 0.05) %>% 
@@ -28,5 +28,3 @@ df_evalue %>% filter(variable != "(Intercept)") %>%
   flextable() %>% 
   colformat_double(digits = 2)
 ```
-
-# Forest Plots

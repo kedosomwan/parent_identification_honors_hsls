@@ -24,7 +24,7 @@ library(mitools)
 
 # Load Dataset
 ```{r}
-df_stata <- haven::read_dta("gcq_hsls_subset.dta")
+df_stata <- haven::read_dta("data/gcq_hsls_subset.dta")
 ```
 
 # Modify Dataset
@@ -73,10 +73,10 @@ df_imp <- mice(
 end_time <- Sys.time()
 end_time - start_time
 # Save the imputed data
-save(df_imp, file = "df_imputed.rdata")
+save(df_imp, file = "data/df_imputed.rdata")
 
 # Load imputed data
-#load("df_imputed.rdata")
+#load("data/df_imputed.rdata")
 ```
 
 ## Racial/Ethnic Subgroups

@@ -23,7 +23,7 @@ library(psych)
 library(broom)
 library(gtsummary)
 library(jtools)
-hsls_raw <- read_dta("hsls_17_student_pets_sr_v1_0.dta")
+hsls_raw <- read_dta("data/hsls_17_student_pets_sr_v1_0.dta")
 names(hsls_raw) <- tolower(names(hsls_raw))
 ```
 
@@ -240,7 +240,7 @@ par_exp = ordered(
 ## Save Clean Dataset
 
 ```{r save}
-write_dta(hsls, "gcq_hsls_subset.dta")
+write_dta(hsls, "data/gcq_hsls_subset.dta")
 ```
 
 
